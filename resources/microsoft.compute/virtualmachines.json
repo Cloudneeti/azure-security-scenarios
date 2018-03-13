@@ -1,0 +1,103 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters":{
+      "vmName" : {
+        "type" : "string",
+        "defaultValue": "[concat('vm-',substring(uniqueString(resourceGroup().name),1,10))]",
+        "minLength": 1,
+        "maxLength": 15,
+        "metadata": {
+            "description": "VM name." 
+        }
+      },
+      "location" : {
+        "type" : "string",
+        "defaultValue": "[resourceGroup().location]",
+        "minLength": 1,
+        "maxLength": 15,
+        "metadata": {
+            "description": "VM deployment location." 
+        }
+      },            
+      "vmAdminUsername" : {
+        "type" : "string",
+        "defaultValue": "vmadmin",
+        "minLength": 1,
+        "maxLength": 20,
+        "metadata": {
+            "description": "VM administrator username." 
+        }
+      },
+      "vmAdminPassword" : {
+        "type" : "securestring",
+        "minLength": 8,
+        "maxLength": 123,
+        "metadata": {
+            "description": "VM administrator password." 
+        }
+      },
+      "networkInterfaceId" : {
+        "type" : "string",
+        "metadata": {
+            "description": "Network interface id." 
+        }
+      },
+      "osProfile" : {
+        "type" : "string",
+        "defaultValue": "2016-Datacenter",
+        "allowedValues": [ 
+          "2012-R2-Datacenter",
+          "2016-Datacenter"
+        ],
+        "metadata": {
+            "description": "Operating system name." 
+        }
+      },
+    },
+    "variables":{
+
+    },
+    "resources":[
+      {
+        "apiVersion": "2017-12-01",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[parameters('vmName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "hardwareProfile": { "vmSize": "Standard_DS1" },
+          "osProfile": {
+            "computerName": "[parameters('vmName')]",
+            "adminUsername": "[parameters('vmAdminUsername')]",
+            "adminPassword": "[parameters('vmAdminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "MicrosoftWindowsServer",
+              "offer": "WindowsServer",
+              "sku": "[parameters('osProfile')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "[concat(parameters('vmName'),'-OSDisk')]",
+              "caching": "ReadWrite",
+              "createOption": "FromImage",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              },
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+                {
+                    "id": "[parameters('networkInterfaceId')]"
+                }
+            ]
+          }
+        }
+      }        
+    ],
+    "outputs": {
+
+    }
+}

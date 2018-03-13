@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sku": {
+      "defaultvalue": "Standard",
+      "type": "string",
+      "allowedValues": [
+              "Standard",
+              "P10Premium",
+              "P20Premium",
+              "Free"
+          ],
+          "metadata": {
+            "description": "Enter the scheduler sku."
+        }
+    },
+
+    "state": {
+      "defaultvalue": "Enabled",
+      "type": "string",
+      "allowedValues": [
+              "Enabled",
+              "Disabled",
+              "Suspended",
+              "Deleted"
+          ],
+          "metadata": {
+            "description": "Enter the scheduler state."
+        }
+    },
+
+   "schedulerName":{
+     "type": "string",
+     "metadata": {
+      "description": "Enter the scheduler name."
+  }
+   },
+
+   "tags":{
+     "type": "object",
+     "metadata": {
+      "description": "Enter the tags for scheduler."
+  }
+   },
+
+   "location":{
+    "type": "string",
+    "metadata": {
+      "description": "Enter the scheduler location."
+  }
+   }
+
+  },
+  
+"variables": {
+  
+},
+  "resources": [
+    {
+
+      "type": "Microsoft.Scheduler/jobCollections",
+      "name": "[parameters('schedulerName')]",
+      "apiVersion": "2016-03-01",
+      "tags": "[parameters('tags')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "[parameters('sku')]"
+        },
+        "state": "[parameters('state')]"
+      },
+      "resources": []
+    }
+  ],
+  "outputs": {}
+}

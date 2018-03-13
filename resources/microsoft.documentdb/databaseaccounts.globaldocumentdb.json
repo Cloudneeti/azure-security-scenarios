@@ -1,0 +1,111 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "locationName": {
+      "type": "string"
+    },
+    "defaultExperience": {
+      "type": "string"
+    },
+    "pairedLocation": {
+      "type": "string"
+    },
+    "pairedLocationName": {
+      "type": "string"
+    },
+    "omsWorkspaceResourceId": {
+      "type": "string"
+    },
+    "logsRetentionInDays": {
+      "type": "int",
+      "defaultValue": 0,
+      "minValue": 0,
+      "maxValue": 365,
+      "metadata": {
+        "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
+      }
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-04-08",
+      "kind": "GlobalDocumentDB",
+      "type": "Microsoft.DocumentDb/databaseAccounts",
+      "name": "[parameters('name')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "locations": [
+          {
+            "id": "[concat(parameters('name'), '-', resourceGroup().location)]",
+            "failoverPriority": 0,
+            "locationName": "[parameters('locationName')]"
+          },
+          {
+            "id": "[concat(parameters('name'), '-', parameters('pairedLocation'))]",
+            "failoverPriority": 1,
+            "locationName": "[parameters('pairedLocationName')]"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "providers/diagnosticSettings",
+          "name": "Microsoft.Insights/service",
+          "dependsOn": [
+            "[parameters('name')]"
+          ],
+          "apiVersion": "2015-07-01",
+          "properties": {
+            "workspaceId": "[parameters('omsWorkspaceResourceId')]",
+            "logs": [
+              {
+                "category": "DataPlaneRequests",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": "[parameters('logsRetentionInDays')]",
+                  "enabled": true
+                }
+              },
+              {
+                "category": "MongoRequests",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": "[parameters('logsRetentionInDays')]",
+                  "enabled": true
+                }
+              }
+            ],
+            "metrics": [
+              {
+                "timeGrain": "Requests",
+                "enabled": true,
+                "retentionPolicy": {
+                  "enabled": true,
+                  "days": "[parameters('logsRetentionInDays')]"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "tags": {
+        "defaultExperience": "[parameters('defaultExperience')]"
+      }
+    }
+  ],
+  "outputs": {
+    "cosmosdbendpoint": {
+      "value": "[reference(concat('Microsoft.DocumentDb/databaseAccounts/', parameters('name')), '2015-04-08').documentEndpoint]",
+      "type": "string"
+    },
+    "cosmosdbkey": {
+      "value": "[listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts/', parameters('name')), '2015-04-08').primaryMasterKey]",
+      "type": "string"
+    }
+  }
+}
