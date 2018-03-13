@@ -80,7 +80,25 @@ function New-RandomPassword() {
     ((10..99) | Get-Random -Count 1)
 }
 
+$testCasesCode = [ordered]@{
+    "4000"  = @{
+        "code" = {  }
+        "desc" = ""
+    }
+    "4001"  = @{
+        "code" = {  }
+        "desc" = ""
+    }
+    "4002"  = @{
+        "code" = {  }
+        "desc" = ""
+    }
+
+}
+
+
 # Export only the functions using PowerShell standard verb-noun naming.
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
-Export-ModuleMember -Function *-*
+Export-ModuleMember -Function Get-StringHash, Install-RequiredModules, New-RandomPassword
+Export-ModuleMember -Variable testCasesCode
