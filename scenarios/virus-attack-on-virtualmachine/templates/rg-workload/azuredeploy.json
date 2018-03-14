@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "type": "secureObject"
+        },
+        "workload": {
+            "type": "secureObject"
+        },
+        "security": {
+            "type": "secureObject"
+        }
+    },
+    "variables": {
+        "vnetName": "[concat('vnet-workload-',uniqueString(resourceGroup().name))]",
+        "vmName": "[substring(concat('vm-',uniqueString(resourceGroup().name)),0,15)]",
+        "publicIPAddressName": "[concat(variables('vmName'),'-pip')]",
+        "nicName": "[concat(variables('vmName'),'-nic')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[parameters('workload').virtualNetwork.name]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/virtualnetworks.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "vnetName": {
+                        "value": "[variables('vnetName')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('workload').virtualNetwork.addressPrefix]"
+                    },
+                    "subnets": {
+                        "value": "[parameters('workload').virtualNetwork.subnets]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": false,
+            "apiVersion": "2017-05-10",
+            "name": "deploy-vm-with-trend-micro-agent",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/templates/resources/microsoft.compute/vmfromimage.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[variables('vmName')]"
+                    },
+                    "username": {
+                        "value": "[parameters('virtualMachine').username]"
+                    },
+                    "password": {
+                        "value": "[parameters('virtualMachine').password]"
+                    },
+                    "nicName": {
+                        "value": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

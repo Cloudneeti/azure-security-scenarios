@@ -33,7 +33,7 @@ Copyright = '(c) 2018 Shabuddin. All rights reserved.'
 # Description = ''
 
 # Minimum version of the Windows PowerShell engine required by this module
-# PowerShellVersion = ''
+ PowerShellVersion = '5.0'
 
 # Name of the Windows PowerShell host required by this module
 # PowerShellHostName = ''
@@ -69,7 +69,7 @@ Copyright = '(c) 2018 Shabuddin. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Get-StringHash', 'Install-RequiredModules', 'New-RandomPassword')
+FunctionsToExport = @('Get-StringHash', 'Install-RequiredModules', 'New-RandomPassword', 'Set-DeploymentArtifacts')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'

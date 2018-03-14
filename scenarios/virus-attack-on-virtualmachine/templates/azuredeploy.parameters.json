@@ -1,13 +1,51 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters":{
-        "tenantReference":{
-            "metadata": {
-                
-            },
-            "value": ""
+    "parameters": {
+        "commonReference": {
+            "value": {
+                "_artifactsLocation": "auto-update",
+                "_artifactsLocationSasToken": "auto-update",
+                "location": "East US",
+                "virtualMachine": {
+                    "username": "deploymentadmin",
+                    "password": "GY45s@67hx!K",
+                    "numberOfDataDisks": 1,
+                    "dataDiskSizeInGB": 128
+                }
+            }
+        },
+        "workload": {
+            "value": {
+                "virtualNetwork": {
+                    "name": "vnet-workload",
+                    "addressPrefix": "10.1.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "default",
+                            "properties": {
+                                "addressPrefix": "10.1.0.0/24"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "security": {
+            "value": {
+                "virtualNetwork": {
+                    "name": "vnet-security",
+                    "addressPrefix": "10.2.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "default",
+                            "properties": {
+                                "addressPrefix": "10.2.0.0/24"
+                            }
+                        }
+                    ]
+                }
+            }
         }
-
     }
 }
