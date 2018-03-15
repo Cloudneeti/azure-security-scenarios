@@ -8,11 +8,13 @@
                 "_artifactsLocation": "auto-update",
                 "_artifactsLocationSasToken": "auto-update",
                 "location": "East US",
+                "deploymentPassword": "GY45s@67hx!K",
                 "virtualMachine": {
-                    "username": "deploymentadmin",
+                    "username": "vmadmin",
                     "password": "GY45s@67hx!K",
                     "numberOfDataDisks": 0,
-                    "dataDiskSizeInGB": 128
+                    "dataDiskSizeInGB": 128,
+                    "size": "Standard_DS2_v2"
                 }
             }
         },
@@ -52,6 +54,16 @@
                             }
                         }
                     ]
+                },
+                "virtualMachine": {
+                    "vmWithTrendDsm":{
+                        "vmSize": "Standard_D2_v2",
+                        "managerPortTrendDSM": "443",
+                        "heartbeatPortTrendDSM": "4120",
+                        "dbAdminName": "dbadmin",
+                        "dbName": "dsm",
+                        "dsmAdminName": "dsmadmin"
+                    }
                 }
             }
         }

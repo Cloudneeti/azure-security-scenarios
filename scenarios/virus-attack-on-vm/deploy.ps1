@@ -46,11 +46,12 @@ begin {
     $moduleFolderPath = "$rootFolder\common\modules\powershell\asc.poc.psd1"
     $credential = New-Object System.Management.Automation.PSCredential ($UserName, $Password)
     $artifactStagingDirectories = @(
-        #"$rootFolder\common"
-        #"$rootFolder\resources"
+        "$rootFolder\common"
+        "$rootFolder\resources"
         "$PSScriptRoot"
     )
-    $resourceGroupName = "{0}-{1}" -f $UseCase, $deploymentName
+    $workloadResourceGroupName = "{0}-{1}-{2}" -f $UseCase, $deploymentName, 'workload'
+    $securityResourceGroupName = "{0}-{1}-{2}" -f $UseCase, $deploymentName, 'security'
     $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pass common parameters to the template.
     $artifactsLocation = '_artifactsLocation'
     $artifactsLocationSasToken = '_artifactsLocationSasToken'
@@ -89,7 +90,8 @@ process {
     }
 
     # Create Resourcegroup
-    New-AzureRmResourceGroup -Name $resourceGroupName -Location $Location -Force
+    New-AzureRmResourceGroup -Name $workloadResourceGroupName -Location $Location -Force
+    New-AzureRmResourceGroup -Name $securityResourceGroupName -Location $Location -Force
 
     Write-Verbose "Check if artifacts storage account exists."
     $storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountName -eq $storageAccountName})
@@ -99,18 +101,18 @@ process {
     try {
         $storageAccountName = 'stage' + $deploymentHash
         Write-Verbose "Verify if artifacts stroage acccount already exists."
-        $artifactsStorageContext = Get-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName
+        $artifactsStorageContext = Get-AzureRmStorageAccount -ResourceGroupName $workloadResourceGroupName -Name $storageAccountName
         Write-Verbose "artifacts storage account found and context retrieved."
     }
     catch {
         Write-Verbose "Creating artifacts storage account."
-        $artifactsStorageContext = New-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $storageAccountName `
+        $artifactsStorageContext = New-AzureRmStorageAccount -ResourceGroupName $workloadResourceGroupName -Name $storageAccountName `
         -SkuName Standard_LRS -Location $Location -Kind StorageV2 -EnableHttpsTrafficOnly $true
         Write-Verbose "Artifacts storage account created successfully."
     }
 
     foreach ($directory in $artifactStagingDirectories) {
-        Set-DeploymentArtifacts -ResourceGroupName $resourceGroupName `
+        Set-DeploymentArtifacts -ResourceGroupName $workloadResourceGroupName `
             -StorageAccountName $artifactsStorageContext.StorageAccountName `
             -DirectoryName $directory
     }
@@ -121,7 +123,7 @@ process {
             Write-Verbose "Artifacts storage account does not exists."
             Write-Verbose "Provisioning artifacts storage account."
             $storageAccount = New-AzureRmStorageAccount -StorageAccountName $storageAccountName -Type 'Standard_LRS' `
-                -ResourceGroupName $resourceGroupName -Location $Location
+                -ResourceGroupName $workloadResourceGroupName -Location $Location
             Write-Verbose "Artifacts storage account provisioned."
             Write-Verbose "Creating storage container to upload a blobs."
             New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
@@ -154,7 +156,10 @@ process {
     ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
     Write-Verbose "Initiate Deployment for TestCase - $DeploymentPrefix"
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+    #New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+
+    Write-Verbose "Initiate Deployment for TestCase - $DeploymentPrefix"
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $securityResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-security\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
 
 }

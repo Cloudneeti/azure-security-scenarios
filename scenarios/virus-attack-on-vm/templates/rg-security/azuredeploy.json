@@ -1,0 +1,279 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "commonReference": {
+      "type": "secureObject"
+    },
+    "workload": {
+      "type": "secureObject"
+    },
+    "security": {
+      "type": "secureObject"
+    }
+  },
+  "variables": {
+    "vnetName": "[concat('vnet-security-',uniqueString(resourceGroup().name))]",
+    "location": "[parameters('commonReference').location]",
+    "vmNameTrendDSM": "trendMicroDSM",
+    "nicNameTrendDSM": "[concat(variables('vmNameTrendDSM'),'-nic')]",
+    "securityGroupNameTrendDSM": "[concat(variables('nicNameTrendDSM'),'-nsg')]",
+    "subnet1Name": "default",
+    "publicIPAddressType": "Dynamic",
+    "publicIPAddressNameTrendDSM": "publicIPTrendDSM",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
+    "storageAccountName": "[tolower(concat(trim(substring(concat(variables('vmNameTrendDSM'),''),0,6)),uniquestring(resourceGroup().id)))]",
+    "vmStorageAccountContainerName": "vhds",
+    "newsqlServerName": "[tolower(concat(variables('vmNameTrendDSM'),uniquestring(resourceGroup().id),'-sql'))]",
+    "deployment-api-version": "2015-11-01",
+    "network-api-version": "2015-06-15",
+    "compute-api-version": "2015-06-15",
+    "publisherTrendDSM": "trendmicro",
+    "databaseOption": "new",
+    "offerChoosedTrendDSM": "[variables(concat('offer', parameters('security').virtualMachine.vmWithTrendDsm.vmSize))]",
+    "existingSQLServerName": "",
+    "uniqueString": "[uniquestring(resourceGroup().id)]",
+    "vmAuthTypeTrendDSM": "password",
+    "linuxConfigurationChoosenTrendDSM": "[variables(concat('linuxConfiguration', variables('vmAuthTypeTrendDSM')))]",
+    "linuxConfigurationpassword": {
+      "disablePasswordAuthentication": "false"
+    },
+    "linuxConfigurationsshPublicKey": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[concat('/home/',parameters('commonReference').virtualMachine.username,'/.ssh/authorized_keys')]",
+            "keyData": "[variables('vmAdminSshPublicKeyTrendDSM')]"
+          }
+        ]
+      }
+    },
+    "vmAdminSshPublicKeyTrendDSM": "",
+    "offerStandard_D2_v2": {
+      "vmSize": "Standard_D2_v2",
+      "vmSku": "dxxn25d2v2",
+      "product": "deep-security-vm"
+    },
+    "offerStandard_D3_v2": {
+      "vmSize": "Standard_D3_v2",
+      "vmSku": "dxxn50d3v2",
+      "product": "deep-security-vm"
+    },
+    "offerStandard_D4_v2": {
+      "vmSize": "Standard_D4_v2",
+      "vmSku": "dxxn100d4v2",
+      "product": "deep-security-vm"
+    },
+    "offerStandard_D5_v2": {
+      "vmSize": "Standard_D5_v2",
+      "vmSku": "dxxn200d5v2",
+      "product": "deep-security-vm"
+    },
+    "offerBYOL": {
+      "vmSize": "[parameters('security').virtualMachine.vmWithTrendDsm.vmSize]",
+      "vmSku": "dxxnbyol",
+      "product": "deep-security-vm-byol"
+    },
+    "datameerTags": {
+      "type": "object",
+      "provider": "ED5CBF45-2AA4-4408-B52D-1C76DFCA0BD7"
+    },
+    "trendmicroTags": {
+      "type": "object",
+      "provider": "F0253A01-8156-4D41-BD91-E182158D4972"
+    },
+    "chefSoftwareTags": {
+      "type": "object",
+      "provider": "33194f91-eb5f-4110-827a-e95f640a9e46"
+    },
+    "quickstartTags": {
+      "type": "object",
+      "name": "datameer-trend-chef-riskanalysis"
+    },
+    "tagvalues": {
+      "program": "PushToPilot",
+      "project": "DatameerTrendHDInsightChef"
+    },
+    "storageTag":{
+      "deploymentName": "[parameters('commonReference').deploymentName]"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-05-10",
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.storage/storageaccounts.storage.json',parameters('commonReference')._artifactsLocationSasToken)]"
+        },
+        "parameters": {
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "location": {
+            "value": "[parameters('commonReference').location]"
+          },
+          "tags": {
+            "value":  "[variables('storageTag')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-05-10",
+      "name": "[parameters('security').virtualNetwork.name]",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/virtualnetworks.json',parameters('commonReference')._artifactsLocationSasToken)]"
+        },
+        "parameters": {
+          "vnetName": {
+            "value": "[variables('vnetName')]"
+          },
+          "addressPrefix": {
+            "value": "[parameters('security').virtualNetwork.addressPrefix]"
+          },
+          "subnets": {
+            "value": "[parameters('security').virtualNetwork.subnets]"
+          },
+          "location": {
+            "value": "[parameters('commonReference').location]"
+          }
+        }
+      }
+    },
+    {
+      "name": "trendmicrodsm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[parameters('security').virtualNetwork.name]",
+        "[variables('storageAccountName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/templates/building-blocks/vm-pip-nsg-trenddsm.json',parameters('commonReference')._artifactsLocationSasToken)]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "_artifactsLocationSasToken": {
+            "value": "[parameters('commonReference')._artifactsLocationSasToken]"
+          },
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "vmStorageAccountContainerName": {
+            "value": "[variables('vmStorageAccountContainerName')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "network-api-version": {
+            "value": "[variables('network-api-version')]"
+          },
+          "compute-api-version": {
+            "value": "[variables('compute-api-version')]"
+          },
+          "tagvalues": {
+            "value": "[variables('tagvalues')]"
+          },
+          "publicIPDomainNameLabelTrendDSM": {
+            "value": "[toLower(concat(variables('vmNameTrendDSM'),variables('uniqueString')))]"
+          },
+          "publicIPAddressType": {
+            "value": "[variables('publicIPAddressType')]"
+          },
+          "publicIPAddressNameTrendDSM": {
+            "value": "[variables('publicIPAddressNameTrendDSM')]"
+          },
+          "nicNameTrendDSM": {
+            "value": "[variables('nicNameTrendDSM')]"
+          },
+          "virtualNetworkName": {
+            "value": "[variables('vnetName')]"
+          },
+          "subnet1Ref": {
+            "value": "[variables('subnet1Ref')]"
+          },
+          "securityGroupNameTrendDSM": {
+            "value": "[variables('securityGroupNameTrendDSM')]"
+          },
+          "managerPortTrendDSM": {
+            "value": "[parameters('security').virtualMachine.vmWithTrendDsm.managerPortTrendDSM]"
+          },
+          "heartbeatPortTrendDSM": {
+            "value": "[parameters('security').virtualMachine.vmWithTrendDsm.heartbeatPortTrendDSM]"
+          },
+          "vmNameTrendDSM": {
+            "value": "[variables('vmNameTrendDSM')]"
+          },
+          "publisherTrendDSM": {
+            "value": "[variables('publisherTrendDSM')]"
+          },
+          "offerChoosedTrendDSM": {
+            "value": "[variables('offerChoosedTrendDSM')]"
+          },
+          "vmAdminNameTrendDSM": {
+            "value": "[parameters('commonReference').virtualMachine.username]"
+          },
+          "vmAdminPasswordTrendDSM": {
+            "value": "[parameters('commonReference').virtualMachine.password]"
+          },
+          "linuxConfigurationChoosenTrendDSM": {
+            "value": "[variables('linuxConfigurationChoosenTrendDSM')]"
+          },
+          "deployment-api-version": {
+            "value": "[variables('deployment-api-version')]"
+          },
+          "baseUrl": {
+            "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName)]"
+          },
+          "databaseOption": {
+            "value": "[variables('databaseOption')]"
+          },
+          "newsqlServerName": {
+            "value": "[variables('newsqlServerName')]"
+          },
+          "existingSQLServerName": {
+            "value": "[variables('existingSQLServerName')]"
+          },
+          "dbAdminName": {
+            "value": "[parameters('security').virtualMachine.vmWithTrendDsm.dbAdminName]"
+          },
+          "dbAdminPassword": {
+            "value": "[parameters('commonReference').deploymentPassword]"
+          },
+          "dbName": {
+            "value": "[parameters('security').virtualMachine.vmWithTrendDsm.dbName]"
+          },
+          "dsmAdminName": {
+            "value": "[parameters('security').virtualMachine.vmWithTrendDsm.dsmAdminName]"
+          },
+          "dsmAdminPassword": {
+            "value": "[parameters('commonReference').deploymentPassword]"
+          },
+          "datameerTags": {
+            "value": "[variables('datameerTags')]"
+          },
+          "trendmicroTags": {
+            "value": "[variables('trendmicroTags')]"
+          },
+          "chefSoftwareTags": {
+            "value": "[variables('chefSoftwareTags')]"
+          },
+          "quickstartTags": {
+            "value": "[variables('quickstartTags')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -2,6 +2,8 @@ $username = "shabuddink@avyanconsulting.com"
 $password = "W0l!mullEr1894"
 $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 $subscriptionId = "b4605119-4803-4924-a221-091570e36d01"
+#"fb6b8e35-7788-4fb3-ac70-95a3cc8386e7"
+#"b4605119-4803-4924-a221-091570e36d01"
 
 ### Create the credential object
 #$credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)

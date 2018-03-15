@@ -14,7 +14,7 @@
     },
     "variables": {
         "vnetName": "[concat('vnet-workload-',uniqueString(resourceGroup().name))]",
-        "vmName": "[substring(concat('vm-tdmagent',uniqueString(resourceGroup().name)),0,15)]"
+        "vmName": "[substring(concat('vm-tmdsa',uniqueString(resourceGroup().name)),0,12)]"
     },
     "resources": [
         {
