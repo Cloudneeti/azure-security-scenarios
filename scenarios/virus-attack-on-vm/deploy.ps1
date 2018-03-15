@@ -64,7 +64,7 @@ begin {
     Import-Module $moduleFolderPath
     Write-Verbose "Module imported."
 
-    $deploymentHash = (Get-StringHash $deploymentName).substring(0,10)
+    $deploymentHash = (Get-StringHash $workloadResourceGroupName).substring(0,10)
     $storageAccountName = 'stage' + $deploymentHash
     $sessionHash = (Get-StringHash $sessionGuid)
     $armDeploymentName = "deploy-$UseCase-$($sessionHash.substring(0,5))"
@@ -155,12 +155,15 @@ process {
     $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
     ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
-    Write-Verbose "Initiate Deployment for TestCase - $DeploymentPrefix"
-    #New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
-
-    Write-Verbose "Initiate Deployment for TestCase - $DeploymentPrefix"
+    Write-Verbose "Initiate Deployment for TestCase - $UseCase"
     New-AzureRmResourceGroupDeployment -ResourceGroupName $securityResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-security\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
+    $deploymentOutput = Get-AzureRmResourceGroupDeployment -ResourceGroupName "$UseCase-virus-attack-on-vm-security" -Name trendmicrodsm
+    $parametersObj.parameters.workload.value.virtualMachine.vmWithTdmAgent.publicIPDomainNameLabelTrendDSM = $deploymentOutput.Outputs.trendmicrodsmUri.Value
+    ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
+
+    Write-Verbose "Initiate Deployment for TestCase - $UseCase"
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
 }
 

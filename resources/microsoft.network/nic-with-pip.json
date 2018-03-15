@@ -17,10 +17,14 @@
             "allowedValues": [
                 "Dynamic",
                 "Static"
-            ],
+            ]
         },
         "location": {
             "type": "string"
+        },
+        "nsgId": {
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "resources": [
@@ -30,6 +34,9 @@
             "name": "[parameters('nicName')]",
             "location": "[parameters('location')]",
             "properties": {
+                "networkSecurityGroup": {
+                    "id": "[parameters('nsgId')]"
+                },
                 "ipConfigurations": [
                     {
                         "name": "ipconfig",

@@ -26,17 +26,134 @@
         "password": {
             "type": "securestring"
         },
+        "managerAddress": {
+            "type": "string"
+        },
+        "heartbeatPortTrendDSM": {
+            "type": "string"
+        },
+        "tenantIdentifier": {
+            "type": "string"
+        },
+        "tenantActivationPassword": {
+            "type": "string"
+        },
         "count": {
             "type": "int"
+        },
+        "securityGroupNameTrendDSA": {
+            "type": "string"
+        },
+        "managerPortTrendDSM": {
+            "type": "string"
         }
     },
-    "variables": {
-
-    },
+    "variables": {},
     "resources": [
         {
+            "apiVersion": "2017-06-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('securityGroupNameTrendDSA')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allow-inbound-ssh",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-dsmportal",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "[parameters('managerPortTrendDSM')]",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1100,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-dsmagent",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4118",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1200,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-dsmheartbeat",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "[parameters('heartbeatPortTrendDSM')]",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1300,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-dsmdownload",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4122",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1400,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-dsmwebinstaller",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1500,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "allow-inbound-rdp",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1600,
+                            "direction": "Inbound"
+                        }
+                    }                    
+                ]
+            }
+        },
+        {
             "apiVersion": "2017-05-10",
-            "name":"[concat(parameters('vmName'),'-',copyIndex(),'-pip')]",
+            "name": "[concat(parameters('vmName'),'-',copyIndex(),'-pip')]",
             "type": "Microsoft.Resources/deployments",
             "copy": {
                 "name": "copy-pip",
@@ -62,7 +179,8 @@
             "name": "[concat(parameters('vmName'),'-',copyIndex(),'-nic')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "copy-pip"
+                "copy-pip",
+                "[parameters('securityGroupNameTrendDSA')]"
             ],
             "copy": {
                 "name": "copy-nic",
@@ -85,6 +203,9 @@
                     },
                     "location": {
                         "value": "[parameters('location')]"
+                    },
+                    "nsgId": {
+                        "value": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('securityGroupNameTrendDSA'))]"
                     }
                 }
             }
@@ -121,8 +242,47 @@
                     "location": {
                         "value": "[parameters('location')]"
                     },
-                    "osSku":{
+                    "osSku": {
                         "value": "[parameters('osSku')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "type": "Microsoft.Resources/deployments",
+            "name": "[concat('dsagent-',copyIndex())]",
+            "dependsOn": [
+                "copy-vm"
+            ],
+            "copy": {
+                "name": "copy-dsa-extension",
+                "count": "[parameters('count')]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'),'/resources/microsoft.compute/extension.dsa.json',parameters('_artifactsLocationSasToken'))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "vmName": {
+                        "value": "[concat(parameters('vmName'),'-',copyIndex())]"
+                    },
+                    "managerAddress": {
+                        "value": "[parameters('managerAddress')]"
+                    },
+                    "activationPort": {
+                        "value": "[parameters('heartbeatPortTrendDSM')]"
+                    },
+                    "tenantIdentifier": {
+                        "value": "[parameters('tenantIdentifier')]"
+                    },
+                    "tenantActivationPassword": {
+                        "value": "[parameters('tenantActivationPassword')]"
                     }
                 }
             }

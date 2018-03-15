@@ -10,4 +10,4 @@ $subscriptionId = "b4605119-4803-4924-a221-091570e36d01"
 
 #Login-AzureRmAccount -Subscription $subscriptionId -Credential $credential
 
-.\deploy.ps1 -UseCase 10001 -SubscriptionId $subscriptionId -UserName $username -Password $securePassword -UploadBlob -Verbose
+.\deploy.ps1 -UseCase 10003 -SubscriptionId $subscriptionId -UserName $username -Password $securePassword -UploadBlob -Verbose

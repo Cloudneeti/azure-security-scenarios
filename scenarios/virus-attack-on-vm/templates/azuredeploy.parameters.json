@@ -36,7 +36,8 @@
                     "vmWithTdmAgent":{
                         "vmNamePrefix": "vm-tdmagent",
                         "osSku": "2016-Datacenter",
-                        "count": 2
+                        "count": 2,
+                        "publicIPDomainNameLabelTrendDSM": ""
                     }
                 }
             }

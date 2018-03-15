@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "managerAddress": {
+            "type": "string"
+        },
+        "vmName": {
+            "type": "string"
+        },
+        "activationPort": {
+            "type": "string"
+        },
+        "tenantIdentifier": {
+            "type": "string"
+        },
+        "tenantActivationPassword": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmName'),'/Installation')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "TrendMicro.DeepSecurity",
+                "type": "TrendMicroDSA",
+                "typeHandlerVersion": "9.6",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "DSMname": "[parameters('managerAddress')]",
+                    "DSMport": "[parameters('activationPort')]",
+                    "policyNameorID": ""
+                },
+                "protectedSettings": {
+                    "tenantID": "[parameters('tenantIdentifier')]",
+                    "tenantPassword": "[parameters('tenantActivationPassword')]"
+                }
+            }
+        }
+    ]
+}

@@ -14,7 +14,15 @@
     },
     "variables": {
         "vnetName": "[concat('vnet-workload-',uniqueString(resourceGroup().name))]",
-        "vmName": "[substring(concat('vm-tmdsa',uniqueString(resourceGroup().name)),0,12)]"
+        "vmName": "[substring(concat('vm-tmdsa',uniqueString(resourceGroup().name)),0,12)]",
+        "securityGroupNameTrendDSA": "[concat(variables('vmName'),'-nsg')]",
+        "uniqueString": "[uniquestring(resourceGroup().id)]",
+        "location": "[parameters('commonReference').location]",
+        "vmNameTrendDSM": "trendMicroDSM",
+        "tenantIdentifier": "NA",
+        "tenantActivationPassword": "NA",
+        "publicIPDomainNameLabelTrendDSM": "[toLower(concat(variables('vmNameTrendDSM'),variables('uniqueString')))]",
+        "managerAddress": "[concat(variables('publicIPDomainNameLabelTrendDSM'),variables('uniqueString'),'.',variables('location'),'.cloudapp.azure.com')]",        
     },
     "resources": [
         {
@@ -43,14 +51,14 @@
             }
         },
         {
-            "condition":true,
+            "condition": true,
             "apiVersion": "2017-05-10",
             "name": "deploy-vm-with-trend-micro-agent",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri":  "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/templates/building-blocks/vm-pip-tdmagent.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/templates/building-blocks/vm-pip-tdmagent.json',parameters('commonReference')._artifactsLocationSasToken)]"
                 },
                 "parameters": {
                     "_artifactsLocation": {
@@ -76,6 +84,24 @@
                     },
                     "osSku": {
                         "value": "[parameters('workload').virtualMachine.vmWithTdmAgent.osSku]"
+                    },
+                    "managerAddress": {
+                        "value": "[parameters('workload').virtualMachine.vmWithTdmAgent.publicIPDomainNameLabelTrendDSM]"
+                    },
+                    "heartbeatPortTrendDSM": {
+                        "value": "[parameters('security').virtualMachine.vmWithTrendDsm.heartbeatPortTrendDSM]"
+                    },
+                    "securityGroupNameTrendDSA": {
+                        "value": "[variables('securityGroupNameTrendDSA')]"
+                      },
+                      "managerPortTrendDSM": {
+                        "value": "[parameters('security').virtualMachine.vmWithTrendDsm.managerPortTrendDSM]"
+                      },
+                    "tenantIdentifier": {
+                        "value": "[variables('tenantIdentifier')]"
+                    },
+                    "tenantActivationPassword": {
+                        "value": "[variables('tenantActivationPassword')]"
                     },
                     "count": {
                         "value": "[parameters('workload').virtualMachine.vmWithTdmAgent.count]"
