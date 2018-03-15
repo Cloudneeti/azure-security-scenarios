@@ -14,9 +14,7 @@
     },
     "variables": {
         "vnetName": "[concat('vnet-workload-',uniqueString(resourceGroup().name))]",
-        "vmName": "[substring(concat('vm-',uniqueString(resourceGroup().name)),0,15)]",
-        "publicIPAddressName": "[concat(variables('vmName'),'-pip')]",
-        "nicName": "[concat(variables('vmName'),'-nic')]"
+        "vmName": "[substring(concat('vm-tdmagent',uniqueString(resourceGroup().name)),0,15)]"
     },
     "resources": [
         {
@@ -45,30 +43,42 @@
             }
         },
         {
-            "condition": false,
+            "condition":true,
             "apiVersion": "2017-05-10",
             "name": "deploy-vm-with-trend-micro-agent",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/templates/resources/microsoft.compute/vmfromimage.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                    "uri":  "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/templates/building-blocks/vm-pip-tdmagent.json',parameters('commonReference')._artifactsLocationSasToken)]"
                 },
                 "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('commonReference')._artifactsLocation]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('commonReference')._artifactsLocationSasToken]"
+                    },
+                    "vnetName": {
+                        "value": "[variables('vnetName')]"
+                    },
                     "vmName": {
                         "value": "[variables('vmName')]"
                     },
-                    "username": {
-                        "value": "[parameters('virtualMachine').username]"
-                    },
-                    "password": {
-                        "value": "[parameters('virtualMachine').password]"
-                    },
-                    "nicName": {
-                        "value": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-                    },
                     "location": {
                         "value": "[parameters('commonReference').location]"
+                    },
+                    "username": {
+                        "value": "[parameters('commonReference').virtualMachine.username]"
+                    },
+                    "password": {
+                        "value": "[parameters('commonReference').virtualMachine.password]"
+                    },
+                    "osSku": {
+                        "value": "[parameters('workload').virtualMachine.vmWithTdmAgent.osSku]"
+                    },
+                    "count": {
+                        "value": "[parameters('workload').virtualMachine.vmWithTdmAgent.count]"
                     }
                 }
             }

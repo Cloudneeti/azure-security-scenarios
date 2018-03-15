@@ -14,10 +14,7 @@
         "vmName": {
             "type": "string"
         },
-        "publicIPAddressName": {
-            "type": "string"
-        },
-        "nicName": {
+        "osSku": {
             "type": "string"
         },
         "location": {
@@ -28,6 +25,9 @@
         },
         "password": {
             "type": "securestring"
+        },
+        "count": {
+            "type": "int"
         }
     },
     "variables": {
@@ -36,16 +36,20 @@
     "resources": [
         {
             "apiVersion": "2017-05-10",
-            "name": "deploy-pip",
+            "name":"[concat(parameters('vmName'),'-',copyIndex(),'-pip')]",
             "type": "Microsoft.Resources/deployments",
+            "copy": {
+                "name": "copy-pip",
+                "count": "[parameters('count')]"
+            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('_artifactsLocation'),'/templates/resources/microsoft.network/publicipaddress.json',parameters('_artifactsLocationSasToken'))]"
+                    "uri": "[concat(parameters('_artifactsLocation'),'/resources/microsoft.network/publicipaddress.json',parameters('_artifactsLocationSasToken'))]"
                 },
                 "parameters": {
                     "publicIPAddressName": {
-                        "value": "[parameters('publicIPAddressName')]"
+                        "value": "[concat(parameters('vmName'),'-',copyIndex(),'-pip')]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -55,23 +59,26 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "deploy-nic-with-pip",
+            "name": "[concat(parameters('vmName'),'-',copyIndex(),'-nic')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "deploy-vnet",
-                "deploy-pip"
+                "copy-pip"
             ],
+            "copy": {
+                "name": "copy-nic",
+                "count": "[parameters('count')]"
+            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('_artifactsLocation'),'/templates/resources/microsoft.network/nic-with-pip.json',parameters('_artifactsLocationSasToken'))]"
+                    "uri": "[concat(parameters('_artifactsLocation'),'/resources/microsoft.network/nic-with-pip.json',parameters('_artifactsLocationSasToken'))]"
                 },
                 "parameters": {
                     "nicName": {
-                        "value": "[parameters('nicName')]"
+                        "value": "[concat(parameters('vmName'),'-',copyIndex(),'-nic')]"
                     },
                     "publicIPAddressId": {
-                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]"
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('vmName'),'-',copyIndex(),'-pip'))]"
                     },
                     "subnetId": {
                         "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('vnetName'),'default')]"
@@ -84,19 +91,23 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "deploy-vmfromimage",
+            "name": "[concat(parameters('vmName'),'-',copyIndex())]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "deploy-nic-with-pip"
+                "copy-nic"
             ],
+            "copy": {
+                "name": "copy-vm",
+                "count": "[parameters('count')]"
+            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('_artifactsLocation'),'/templates/resources/microsoft.compute/vmfromimage.json',parameters('_artifactsLocationSasToken'))]"
+                    "uri": "[concat(parameters('_artifactsLocation'),'/resources/microsoft.compute/vmfromimage.json',parameters('_artifactsLocationSasToken'))]"
                 },
                 "parameters": {
                     "vmName": {
-                        "value": "[parameters('vmName')]"
+                        "value": "[concat(parameters('vmName'),'-',copyIndex())]"
                     },
                     "adminUsername": {
                         "value": "[parameters('username')]"
@@ -105,10 +116,13 @@
                         "value": "[parameters('password')]"
                     },
                     "nicId": {
-                        "value": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicName'))]"
+                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('vmName'),'-',copyIndex(),'-nic'))]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
+                    },
+                    "osSku":{
+                        "value": "[parameters('osSku')]"
                     }
                 }
             }

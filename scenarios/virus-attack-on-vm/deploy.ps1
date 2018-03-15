@@ -46,8 +46,8 @@ begin {
     $moduleFolderPath = "$rootFolder\common\modules\powershell\asc.poc.psd1"
     $credential = New-Object System.Management.Automation.PSCredential ($UserName, $Password)
     $artifactStagingDirectories = @(
-        "$rootFolder\common"
-        "$rootFolder\resources"
+        #"$rootFolder\common"
+        #"$rootFolder\resources"
         "$PSScriptRoot"
     )
     $resourceGroupName = "{0}-{1}" -f $UseCase, $deploymentName
@@ -65,6 +65,8 @@ begin {
 
     $deploymentHash = (Get-StringHash $deploymentName).substring(0,10)
     $storageAccountName = 'stage' + $deploymentHash
+    $sessionHash = (Get-StringHash $sessionGuid)
+    $armDeploymentName = "deploy-$UseCase-$($sessionHash.substring(0,5))"
 
     Write-Verbose "Generating tmp file for deployment parameters."
     $tmp = [System.IO.Path]::GetTempFileName()
@@ -152,7 +154,7 @@ process {
     ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
     Write-Verbose "Initiate Deployment for TestCase - $DeploymentPrefix"
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name "deploy-case-$UseCase" -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
 
 }

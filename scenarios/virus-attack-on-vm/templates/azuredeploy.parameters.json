@@ -4,13 +4,14 @@
     "parameters": {
         "commonReference": {
             "value": {
+                "deploymentName": "virus-attack-on-vm",
                 "_artifactsLocation": "auto-update",
                 "_artifactsLocationSasToken": "auto-update",
                 "location": "East US",
                 "virtualMachine": {
                     "username": "deploymentadmin",
                     "password": "GY45s@67hx!K",
-                    "numberOfDataDisks": 1,
+                    "numberOfDataDisks": 0,
                     "dataDiskSizeInGB": 128
                 }
             }
@@ -28,6 +29,13 @@
                             }
                         }
                     ]
+                },
+                "virtualMachine": {
+                    "vmWithTdmAgent":{
+                        "vmNamePrefix": "vm-tdmagent",
+                        "osSku": "2016-Datacenter",
+                        "count": 2
+                    }
                 }
             }
         },
