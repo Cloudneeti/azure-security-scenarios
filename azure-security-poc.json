@@ -1,0 +1,14 @@
+{
+    "0001": {
+        "description": "Virus attack on Virtual Machine",
+        "value": "virus-attack-on-vm"
+    },
+    "0002": {
+        "description": "XSS attack on a Web App hosted on a Azure Web App (App Service)",
+        "value": ""
+    },
+    "0003": {
+        "description": "SQL injection attack on a Web Application (Web App + SQL DB)",
+        "value": ""
+    }
+}

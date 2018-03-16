@@ -13,13 +13,13 @@ param (
     $SubscriptionId,
 
     # Enter AAD Username with Owner permission at subscription level and Global Administrator at AAD level.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("user")]
     [string]
     $UserName,
 
     # Enter AAD Username password as securestring.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("pwd")]
     [securestring]
     $Password,
@@ -28,6 +28,11 @@ param (
     [Parameter(Mandatory = $false)]
     [string]
     $Location = "East US",
+
+    # Provide artifacts storage account name.
+    [Parameter(Mandatory = $false)]
+    [string]
+    $artifactsStorageAccountName = $null,
 
     [switch]
     $UploadBlob
@@ -46,8 +51,8 @@ begin {
     $moduleFolderPath = "$rootFolder\common\modules\powershell\asc.poc.psd1"
     $credential = New-Object System.Management.Automation.PSCredential ($UserName, $Password)
     $artifactStagingDirectories = @(
-        "$rootFolder\common"
-        "$rootFolder\resources"
+        #"$rootFolder\common"
+        #"$rootFolder\resources"
         "$PSScriptRoot"
     )
     $workloadResourceGroupName = "{0}-{1}-{2}" -f $UseCase, $deploymentName, 'workload'
@@ -65,7 +70,12 @@ begin {
     Write-Verbose "Module imported."
 
     $deploymentHash = (Get-StringHash $workloadResourceGroupName).substring(0,10)
-    $storageAccountName = 'stage' + $deploymentHash
+    if ($artifactsStorageAccountName -eq $null) {
+        $storageAccountName = 'stage' + $deploymentHash
+    }
+    else {
+        $storageAccountName = $artifactsStorageAccountName
+    }
     $sessionHash = (Get-StringHash $sessionGuid)
     $armDeploymentName = "deploy-$UseCase-$($sessionHash.substring(0,5))"
 
