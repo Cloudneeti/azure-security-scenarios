@@ -123,7 +123,7 @@ process {
             }
             {($POCs).PSObject.Properties.Name -contains "$_"} {
                 $scenario = ($POCs | Select-Object -expandproperty $_).value
-                & "$PSScriptRoot\scenarios\$scenario\deploy.ps1" -UseCase $_ -SubscriptionId $subscriptionId -UserName $username -Password $securePassword -artifactsStorageAccountName $storageAccountName -UploadBlob -Verbose
+                & "$PSScriptRoot\scenarios\$scenario\deploy.ps1" -CaseNo $_ -SubscriptionId $subscriptionId -UserName $username -Password $securePassword -artifactsStorageAccountName $storageAccountName -UploadBlob -Verbose
             }
             'Exit' {
                 Write-Host "Exiting.."

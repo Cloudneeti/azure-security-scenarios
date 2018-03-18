@@ -4,7 +4,7 @@ param (
     [Parameter(Mandatory = $true)]
     [Alias("prefix")]
     [string]
-    $UseCase,
+    $CaseNo,
 
     # Enter Subscription Id for deployment.
     [Parameter(Mandatory = $true)]
@@ -55,8 +55,8 @@ begin {
         #"$rootFolder\resources"
         "$PSScriptRoot"
     )
-    $workloadResourceGroupName = "{0}-{1}-{2}" -f $UseCase, $deploymentName, 'workload'
-    $securityResourceGroupName = "{0}-{1}-{2}" -f $UseCase, $deploymentName, 'security'
+    $workloadResourceGroupName = "{0}-{1}-{2}" -f $CaseNo, $deploymentName, 'workload'
+    $securityResourceGroupName = "{0}-{1}-{2}" -f $CaseNo, $deploymentName, 'security'
     $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pass common parameters to the template.
     $artifactsLocation = '_artifactsLocation'
     $artifactsLocationSasToken = '_artifactsLocationSasToken'
@@ -77,7 +77,7 @@ begin {
         $storageAccountName = $artifactsStorageAccountName
     }
     $sessionHash = (Get-StringHash $sessionGuid)
-    $armDeploymentName = "deploy-$UseCase-$($sessionHash.substring(0,5))"
+    $armDeploymentName = "deploy-$CaseNo-$($sessionHash.substring(0,5))"
 
     Write-Verbose "Generating tmp file for deployment parameters."
     $tmp = [System.IO.Path]::GetTempFileName()
@@ -165,14 +165,14 @@ process {
     $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
     ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
-    Write-Verbose "Initiate Deployment for TestCase - $UseCase"
+    Write-Verbose "Initiate Deployment for TestCase - $CaseNo"
     New-AzureRmResourceGroupDeployment -ResourceGroupName $securityResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-security\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
-    $deploymentOutput = Get-AzureRmResourceGroupDeployment -ResourceGroupName "$UseCase-virus-attack-on-vm-security" -Name trendmicrodsm
+    $deploymentOutput = Get-AzureRmResourceGroupDeployment -ResourceGroupName "$CaseNo-virus-attack-on-vm-security" -Name trendmicrodsm
     $parametersObj.parameters.workload.value.virtualMachine.vmWithTdmAgent.publicIPDomainNameLabelTrendDSM = $deploymentOutput.Outputs.trendmicrodsmUri.Value
     ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
-    Write-Verbose "Initiate Deployment for TestCase - $UseCase"
+    Write-Verbose "Initiate Deployment for TestCase - $CaseNo"
     New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\rg-workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
 }
