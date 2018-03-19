@@ -1,14 +1,14 @@
 {
-    "0001": {
+    "virus-attack-on-vm": {
         "description": "Virus attack on Virtual Machine",
-        "value": "virus-attack-on-vm"
+        "caseNo": "0001"
     },
-    "0002": {
+    "xss-attack-on-webapp": {
         "description": "XSS attack on a Web App hosted on a Azure Web App (App Service)",
-        "value": ""
+        "caseNo": "0002"
     },
-    "0003": {
+    "sql-injection-attack-on-webapp": {
         "description": "SQL injection attack on a Web Application (Web App + SQL DB)",
-        "value": ""
+        "caseNo": "0003"
     }
 }

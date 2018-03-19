@@ -7,7 +7,7 @@ param (
     $CaseNo,
 
     # Enter Subscription Id for deployment.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("subscription")]
     [guid]
     $SubscriptionId,
@@ -86,16 +86,20 @@ begin {
 
 process {
 
-    ### Create the credential object
-    $credential = New-Object System.Management.Automation.PSCredential($UserName, $Password)
-
-    try {
-        Write-Verbose "Setting AzureRM context to Subscription Id - $SubscriptionId."
-        Set-AzureRmContext -Subscription $SubscriptionId
-    }
-    catch {
-        Write-Verbose "Login to Subscription - $SubscriptionId"
-        Login-AzureRmAccount -Subscription $SubscriptionId -Credential $credential
+    if((Get-AzureRmContext).Subscription -eq $null){
+        if ($SubscriptionId -eq $null -or $UserName -eq $null -or $Password -eq $null) {
+            throw "Kindly make sure SubscriptionID, Username and Password parameters are provided during the deployment."
+        }
+        ### Create the credential object
+        $credential = New-Object System.Management.Automation.PSCredential($UserName, $Password)
+        try {
+            Write-Verbose "Setting AzureRM context to Subscription Id - $SubscriptionId."
+            Set-AzureRmContext -Subscription $SubscriptionId
+        }
+        catch {
+            Write-Verbose "Login to Subscription - $SubscriptionId"
+            Login-AzureRmAccount -Subscription $SubscriptionId -Credential $credential
+        }
     }
 
     # Create Resourcegroup
@@ -104,28 +108,26 @@ process {
     Write-Verbose "Check if artifacts storage account exists."
     $storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountName -eq $storageAccountName})
 
-    if ($UploadBlob) {
-        # Create the storage account if it doesn't already exist
-        if ($storageAccount -eq $null) {
-            Write-Verbose "Artifacts storage account does not exists."
-            Write-Verbose "Provisioning artifacts storage account."
-            $storageAccount = New-AzureRmStorageAccount -StorageAccountName $storageAccountName -Type 'Standard_LRS' `
-                -ResourceGroupName $workloadResourceGroupName -Location $Location
-            Write-Verbose "Artifacts storage account provisioned."
-            Write-Verbose "Creating storage container to upload a blobs."
-            New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
-        }
-        else {
-            New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
-        }
+    # Create the storage account if it doesn't already exist
+    if ($storageAccount -eq $null) {
+        Write-Verbose "Artifacts storage account does not exists."
+        Write-Verbose "Provisioning artifacts storage account."
+        $storageAccount = New-AzureRmStorageAccount -StorageAccountName $storageAccountName -Type 'Standard_LRS' `
+            -ResourceGroupName $workloadResourceGroupName -Location $Location
+        Write-Verbose "Artifacts storage account provisioned."
+        Write-Verbose "Creating storage container to upload a blobs."
+        New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
+    }
+    else {
+        New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
+    }
 
-        # Copy files from the local storage staging location to the storage account container
-        foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
-            $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
-            foreach ($SourcePath in $ArtifactFilePaths) {
-                Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
-                    -Container $storageContainerName -Context $storageAccount.Context -Force
-            }
+    # Copy files from the local storage staging location to the storage account container
+    foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
+        $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
+        foreach ($SourcePath in $ArtifactFilePaths) {
+            Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
+                -Container $storageContainerName -Context $storageAccount.Context -Force
         }
     }
 
