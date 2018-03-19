@@ -22,6 +22,22 @@
 #>
 [CmdletBinding()]
 param (
+    [Parameter(Mandatory = $false)]
+    [ValidateScript({
+        if ( (Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json).PSObject.Properties.Name -contains "$_") {
+            $true
+        }
+        else {
+            throw "Invalid input. Run deploy-azuresecurityscenarios.ps1 -Help to view supported scenario names."
+        }
+    })] 
+    [string]
+    $Scenario,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("Deploy","Attack","Remediate")] 
+    [string]
+    $Command = "Deploy",
 
     # Enter Subscription Id for deployment.
     [Parameter(Mandatory = $false)]
@@ -45,7 +61,6 @@ param (
     [Parameter(Mandatory = $false)]
     [string]
     $Location = "East US"
-
 )
 begin {
     $ErrorActionPreference = 'Stop'
