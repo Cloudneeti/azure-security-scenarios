@@ -17,10 +17,17 @@
             "allowedValues": [
                 "Dynamic",
                 "Static"
-            ],
+            ]
         },
         "location": {
             "type": "string"
+        },
+        "nsgId": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "tags": {
+            "type": "object"
         }
     },
     "resources": [
@@ -29,7 +36,11 @@
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
             "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
             "properties": {
+                "networkSecurityGroup": {
+                    "id": "[parameters('nsgId')]"
+                },
                 "ipConfigurations": [
                     {
                         "name": "ipconfig",

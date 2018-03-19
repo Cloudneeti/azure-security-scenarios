@@ -1,9 +1,36 @@
+# Custom Configuration
+Set-StrictMode -Version Latest
+
 #  Variables
 
-#  Aliases
+## Default variables
+
+$Error.Clear()
+
+## Custom variables
+$rootFolder = Split-Path(Split-Path(Split-Path(Split-Path($PSScriptRoot))))
+
+$testCasesCode = [ordered]@{
+    "4000" = @{
+        "code" = {  }
+        "desc" = ""
+    }
+    "4001" = @{
+        "code" = {  }
+        "desc" = ""
+    }
+    "4002" = @{
+        "code" = {  }
+        "desc" = ""
+    }
+
+}
+
+#  Import required module
+
+#Import-Module AzureRM
 
 #  Functions
-
 <#
 .SYNOPSIS
     Converts String into Hash Value.
@@ -80,25 +107,70 @@ function New-RandomPassword() {
     ((10..99) | Get-Random -Count 1)
 }
 
-$testCasesCode = [ordered]@{
-    "4000"  = @{
-        "code" = {  }
-        "desc" = ""
-    }
-    "4001"  = @{
-        "code" = {  }
-        "desc" = ""
-    }
-    "4002"  = @{
-        "code" = {  }
-        "desc" = ""
-    }
+function Set-DeploymentArtifacts (
+    [CmdletBinding()]
+    # Parameter help description
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $ResourceGroupName,
 
+    # Parameter help description
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $StorageAccountName,
+
+    # Parameter help description
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $DirectoryName
+
+) {
+    try {
+        $artifactsContainerName = "artifacts"
+        Write-Verbose "Get storage account information."
+        $storageAccount = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName
+        Write-Verbose "Storage account information retrieved successfully."
+        $containerList = (Get-AzureStorageContainer -Context $StorageAccount.Context | Select-Object -ExpandProperty Name)
+        Write-Verbose "Container list retrieved."
+        if ($containerList -eq $null) {
+            Write-Verbose "No containers found. Creating container for artifacts."
+            New-AzureStorageContainer -Name $artifactsContainerName -Context $storageAccount.Context
+            Write-Verbose "Contianer for artifacts created."
+        }
+        elseif ($artifactsContainerName -notin $containerList) {
+            Write-Verbose "Container list retrieved. Container for artifacts was not found."
+            New-AzureStorageContainer -Name $artifactsContainerName -Context $storageAccount.Context
+            Write-Verbose "Contianer for artifacts created."
+        }
+        else {
+            Write-Host "Container for artifacts already exists."
+        }
+
+        Write-Verbose "Scanning Directory $DirectoryName for JSON templates."
+        $artifacts = Get-ChildItem $DirectoryName -Recurse -File -Filter *.json
+        $artifacts
+        Write-Verbose "Uploading templates to artifacts storage account."
+        $artifacts | ForEach-Object {
+            $_.FullName
+            ("$_.FullName").Length
+            $_.FullName.Remove(0, ($_.FullName.Length + 1))
+            #Set-AzureStorageBlobContent -Context $storageAccount.Context -Container $artifactsContainerName -File $_.FullName -Blob $_.FullName.Remove(0, ($_.FullName.Length + 1)) -Force
+            #Write-Verbose "Uploaded $($_.FullName) to $($storageAccount.StorageAccountName)."
+        }
+    }
+    catch {
+        $Error
+    }
 }
-
 
 # Export only the functions using PowerShell standard verb-noun naming.
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
-Export-ModuleMember -Function Get-StringHash, Install-RequiredModules, New-RandomPassword
-Export-ModuleMember -Variable testCasesCode
+Export-ModuleMember -Function Get-StringHash, Install-RequiredModules, New-RandomPassword, Set-DeploymentArtifacts
+Export-ModuleMember -Variable testCasesCode, rootFolder

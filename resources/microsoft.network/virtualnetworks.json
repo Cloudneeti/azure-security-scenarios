@@ -13,6 +13,9 @@
         },
         "subnets": {
             "type": "array"
+        },
+        "tags": {
+            "type": "object"
         }
     },
     "resources": [
@@ -21,6 +24,7 @@
             "name": "[parameters('vnetName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [

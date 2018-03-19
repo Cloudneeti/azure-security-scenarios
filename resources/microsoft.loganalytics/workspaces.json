@@ -100,6 +100,14 @@
         "workspaceName":{
             "type": "string",
             "value": "[parameters('omsWorkspaceName')]"
+        },
+        "workspaceId":{
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-03-20').customerId]"
+        },
+        "workspaceKey":{
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces/', parameters('omsWorkspaceName')), '2015-03-20').primarySharedKey]"
         }
     }
 }

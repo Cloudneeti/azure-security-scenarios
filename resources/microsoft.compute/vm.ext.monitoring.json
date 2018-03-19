@@ -1,0 +1,40 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "omsWorkspaceId": {
+            "type": "string"
+        },
+        "omsWorkspaceKey": {
+            "type": "securestring"
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "extensions",
+            "name": "[concat(parameters('vmName'),'/Microsoft.EnterpriseCloud.Monitoring')]",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                "type": "MicrosoftMonitoringAgent",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "workspaceId": "[parameters('omsWorkspaceId')]"
+                },
+                "protectedSettings": {
+                    "workspaceKey": "[parameters('omsWorkspaceKey')]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
