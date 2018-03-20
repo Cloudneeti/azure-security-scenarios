@@ -113,7 +113,7 @@ if((Get-AzureRmContext).Subscription -eq $null){
         Login-AzureRmAccount -Subscription $SubscriptionId -Credential $credential
     }
 }
-<#
+
 # Create Resourcegroup
 New-AzureRmResourceGroup -Name $artifactsResourceGroupName -Location $Location -Force
 
@@ -142,6 +142,6 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
             -Container $storageContainerName -Context $storageAccount.Context -Force
     }
 }
-#>
+
 $caseNo = $caseNo = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
 & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $caseNo -artifactsStorageAccountName $storageAccountName -Verbose
