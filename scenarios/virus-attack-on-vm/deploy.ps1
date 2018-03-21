@@ -2,7 +2,6 @@
 param (
     # Enter prefix for Resource Groups
     [Parameter(Mandatory = $true)]
-    [Alias("prefix")]
     [string]
     $Prefix,
 

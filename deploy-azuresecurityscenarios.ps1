@@ -161,4 +161,4 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
     }
 }
 
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $prefix -artifactsStorageAccountName $storageAccountName -Verbose
+& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose

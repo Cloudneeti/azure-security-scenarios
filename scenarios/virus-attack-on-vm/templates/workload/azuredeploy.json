@@ -10,10 +10,13 @@
         }
     },
     "variables": {
+        "vmNames": [
+            "[concat(parameters('workload').virtualMachine.prefix,'-without-ep')]",
+            "[concat(parameters('workload').virtualMachine.prefix,'-with-ep')]"
+        ],
         "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',uniqueString(resourceGroup().name))]",
         "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',uniqueString(resourceGroup().name))]",
         "nsgName": "[concat(parameters('workload').nsg.prefix,'-',uniqueString(resourceGroup().name))]",
-        "vmName": "[substring(concat(parameters('workload').virtualMachine.prefix,'-',uniqueString(resourceGroup().name)),0,12)]",
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
             "caseNo": "[parameters('commonReference').caseNo]"
@@ -100,7 +103,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmName'),'-',copyIndex(),'-pip')]",
+            "name": "[concat(variables('vmNames')[copyIndex()],'-pip')]",
             "type": "Microsoft.Resources/deployments",
             "copy": {
                 "name": "copy-pip",
@@ -113,7 +116,7 @@
                 },
                 "parameters": {
                     "publicIPAddressName": {
-                        "value": "[concat(variables('vmName'),'-',copyIndex(),'-pip')]"
+                        "value": "[concat(variables('vmNames')[copyIndex()],'-',uniqueString(resourceGroup().name),'-pip')]"
                     },
                     "publicIPAddressType": {
                         "value": "[parameters('workload').virtualMachine.pipAddressType]"
@@ -129,7 +132,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmName'),'-',copyIndex(),'-nic')]",
+            "name": "[concat(variables('vmNames')[copyIndex()],'-nic')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "copy-pip",
@@ -146,10 +149,10 @@
                 },
                 "parameters": {
                     "nicName": {
-                        "value": "[concat(variables('vmName'),'-',copyIndex(),'-nic')]"
+                        "value": "[concat(variables('vmNames')[copyIndex()],'-nic')]"
                     },
                     "publicIPAddressId": {
-                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmName'),'-',copyIndex(),'-pip'))]"
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames')[copyIndex()],'-',uniqueString(resourceGroup().name),'-pip'))]"
                     },
                     "subnetId": {
                         "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'default')]"
@@ -168,7 +171,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmName'),'-',copyIndex())]",
+            "name": "[concat(variables('vmNames')[copyIndex()])]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "copy-nic"
@@ -184,7 +187,7 @@
                 },
                 "parameters": {
                     "vmName": {
-                        "value": "[concat(variables('vmName'),'-',copyIndex())]"
+                        "value": "[concat(variables('vmNames')[copyIndex()])]"
                     },
                     "adminUsername": {
                         "value": "[parameters('workload').virtualMachine.username]"
@@ -193,7 +196,7 @@
                         "value": "[parameters('commonReference').deploymentPassword]"
                     },
                     "nicId": {
-                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmName'),'-',copyIndex(),'-nic'))]"
+                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNames')[copyIndex()],'-nic'))]"
                     },
                     "location": {
                         "value": "[parameters('commonReference').location]"
@@ -206,11 +209,11 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(concat(variables('vmName'),'-',copyIndex()),'/OMSExtension')]",
+            "name": "[concat(concat(variables('vmNames')[copyIndex()]),'/OMSExtension')]",
             "apiVersion": "2015-06-15",
             "location": "[parameters('commonReference').location]",
             "dependsOn": [
-                "[concat(variables('vmName'),'-',copyIndex())]",
+                "[concat(variables('vmNames')[copyIndex()])]",
                 "[variables('omsWorkspaceName')]"
             ],
             "copy": {
@@ -232,7 +235,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'-',copyIndex(1),'/malware')]",
+            "name": "[concat(variables('vmNames')[copyIndex(1)],'/malware')]",
             "apiVersion": "2015-05-01-preview",
             "location": "[parameters('commonReference').location]",
             "dependsOn": [
