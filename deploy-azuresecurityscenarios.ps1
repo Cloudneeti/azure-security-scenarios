@@ -143,5 +143,5 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
     }
 }
 
-$caseNo = $caseNo = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $caseNo -artifactsStorageAccountName $storageAccountName -Verbose
+$Prefix = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
+& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $Prefix -artifactsStorageAccountName $storageAccountName -Verbose

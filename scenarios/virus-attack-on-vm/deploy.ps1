@@ -4,7 +4,7 @@ param (
     [Parameter(Mandatory = $true)]
     [Alias("prefix")]
     [string]
-    $CaseNo,
+    $Prefix,
 
     # Enter Subscription Id for deployment.
     [Parameter(Mandatory = $false)]
@@ -52,7 +52,7 @@ $artifactStagingDirectories = @(
     #"$rootFolder\resources"
     "$PSScriptRoot"
 )
-$workloadResourceGroupName = "{0}-{1}-{2}" -f $CaseNo, $deploymentName, 'workload'
+$workloadResourceGroupName = "{0}-{1}-{2}" -f $Prefix, $deploymentName, 'workload'
 $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pass common parameters to the template.
 $artifactsLocation = '_artifactsLocation'
 $artifactsLocationSasToken = '_artifactsLocationSasToken'
@@ -90,7 +90,7 @@ else {
     $storageAccountName = $artifactsStorageAccountName
 }
 $sessionHash = (Get-StringHash $sessionGuid)
-$armDeploymentName = "deploy-$CaseNo-$($sessionHash.substring(0,5))"
+$armDeploymentName = "deploy-$Prefix-$($sessionHash.substring(0,5))"
 
 Write-Verbose "Generating tmp file for deployment parameters."
 $tmp = [System.IO.Path]::GetTempFileName()
@@ -135,8 +135,8 @@ $parametersObj = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.paramete
 Write-Verbose "Updating parameter file."
 $parametersObj.parameters.commonReference.value._artifactsLocation = $commonTemplateParameters[$artifactsLocation]
 $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
-$parametersObj.parameters.commonReference.value.caseNo = $CaseNo
+$parametersObj.parameters.commonReference.value.caseNo = $Prefix
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
-Write-Verbose "Initiate Deployment for TestCase - $CaseNo"
+Write-Verbose "Initiate Deployment for TestCase - $Prefix"
 New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
