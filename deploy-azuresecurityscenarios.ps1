@@ -25,6 +25,9 @@ param (
     [Parameter(Mandatory = $false,
         ParameterSetName = "Deployment"
     )]
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Cleanup"
+    )]    
     [ValidateScript({
         if ( (Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json).PSObject.Properties.Name -contains "$_") {
             $true
@@ -79,11 +82,20 @@ param (
         ParameterSetName = "Help"
     )]
     [switch]
-    $Help 
+    $Help,
+
+    # use this switch for help information.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Cleanup"
+    )]
+    [switch]
+    $Cleanup
+
 )
 
 $ErrorActionPreference = 'Stop'
 $scenarios = Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json
+$prefix = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
 if ($Help) {
     $scenarios.PSObject.Properties | Select-Object -Property Name ,@{Name="Description"; Expression = {$_.value.description}} | Format-Table
     Break
@@ -112,6 +124,12 @@ if((Get-AzureRmContext).Subscription -eq $null){
         Write-Verbose "Login to Subscription - $SubscriptionId"
         Login-AzureRmAccount -Subscription $SubscriptionId -Credential $credential
     }
+}
+
+if ($Cleanup) {
+    Write-Verbose "Intiating Cleanup for $Scenario"
+    & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -Prefix $prefix -Verbose
+    Break
 }
 
 # Create Resourcegroup
@@ -143,5 +161,4 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
     }
 }
 
-$Prefix = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $Prefix -artifactsStorageAccountName $storageAccountName -Verbose
+& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -CaseNo $prefix -artifactsStorageAccountName $storageAccountName -Verbose

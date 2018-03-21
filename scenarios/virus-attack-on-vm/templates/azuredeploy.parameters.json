@@ -39,7 +39,7 @@
                     "solutions": [
                         "Security",
                         "AzureActivity",
-                        "SecurityCenterFree"
+                        "AntiMalware"
                     ]
                 },
                 "nsg": {

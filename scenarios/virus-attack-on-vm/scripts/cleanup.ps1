@@ -2,7 +2,6 @@
 param (
     # Enter prefix for Resource Groups
     [Parameter(Mandatory = $true)]
-    [Alias("prefix")]
     [string]
     $Prefix,
 
@@ -27,15 +26,21 @@ param (
     # Enter AAD Username password as securestring.
     [Parameter(Mandatory = $false)]
     [string]
-    $Location = "East US",
-
-    # Provide artifacts storage account name.
-    [Parameter(Mandatory = $false)]
-    [string]
-    $artifactsStorageAccountName = $null,
-
-    [switch]
-    $UploadBlob
-
+    $Location = "East US"
 
 )
+
+$ErrorActionPreference = 'Stop'
+Write-Verbose "Setting up deployment variables."
+$deploymentName = "virus-attack-on-vm"
+$workloadResourceGroupName = "{0}-{1}-{2}" -f $Prefix, $deploymentName, 'workload'
+
+try {
+    Write-Verbose "Deleting ResourceGroups"
+    Remove-AzureRmResourceGroup -Name $workloadResourceGroupName -Force
+}
+catch {
+    Throw $_
+}
+
+Write-Host "Resources deleted successfully."
