@@ -16,7 +16,11 @@
             "prefix": "[parameters('commonReference').prefix]"
         },
         "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',uniqueString(resourceGroup().name))]",
-        "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]"
+        "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]",
+        "webAppSettings": {
+            "administrator": "shab",
+            "password": "P@ssw0rd"
+        }
     },
     "resources": [
         {
@@ -93,6 +97,31 @@
                     },
                     "tags": {
                         "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-appsettings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('webAppName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.config.appsettings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "appSettings": {
+                        "value": "[variables('webAppSettings')]"
                     }
                 }
             }

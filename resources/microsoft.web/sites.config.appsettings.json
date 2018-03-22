@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "appSettings": {
+            "type": "object"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('webAppName'),'/appSettings')]",
+            "type": "Microsoft.Web/sites/config",
+            "location": "[parameters('location')]",
+            "properties": "[parameters('appSettings')]"
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters":{
+        "functionAppName": {
+            "type": "string"
+        },
+        "repoUrl": {
+            "type": "string"
+        },
+        "branch": {
+            "type": "string",
+            "defaultValue": "master"
+        }
+    },
+    "resources":[
+        {
+            "apiVersion": "2015-04-01",
+            "name": "[concat(parameters('functionAppName'),'/sourcecontrols')]",
+            "type": "Microsoft.Web/sites/config",
+            "properties": {
+              "RepoUrl": "[parameters('repoUrl')]",
+              "branch": "[parameters('branch')]",
+              "IsManualIntegration": true
+            }
+          }
+    ]
+}
