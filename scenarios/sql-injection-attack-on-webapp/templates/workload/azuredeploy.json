@@ -125,6 +125,34 @@
                     }
                 }
             }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-msdeploy')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat(variables('webAppName'),'-appsettings')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.extensions.msdeploy.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "packageUri": {
+                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/packages/contosoclinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
         }
     ],
     "outputs": {}

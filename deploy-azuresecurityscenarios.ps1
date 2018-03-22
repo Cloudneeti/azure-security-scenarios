@@ -42,7 +42,7 @@ param (
     [Parameter(Mandatory = $false,
         ParameterSetName = "Deployment"
     )]
-    [ValidateSet("Deploy", "Attack", "Remediate")] 
+    [ValidateSet("Deploy", "Attack", "Mitigate", "Remediate")] 
     [string]
     $Command = "Deploy",
 
