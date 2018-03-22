@@ -9,7 +9,7 @@
                 "_artifactsLocationSasToken": "auto-update",
                 "location": "East US",
                 "deploymentPassword": "GY45s@67hx!K",
-                "caseNo": "000"
+                "prefix": "000"
             }
         },
         "workload": {
