@@ -69,7 +69,7 @@ Copyright = '(c) 2018 Shabuddin. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Get-StringHash', 'Install-RequiredModules', 'New-RandomPassword', 'Set-DeploymentArtifacts')
+FunctionsToExport = @('Get-StringHash', 'Install-RequiredModules', 'New-RandomPassword', 'Set-DeploymentArtifacts', 'Register-ResourceProviders')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'

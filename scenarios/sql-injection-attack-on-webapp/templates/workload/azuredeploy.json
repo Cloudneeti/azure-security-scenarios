@@ -14,7 +14,9 @@
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
             "prefix": "[parameters('commonReference').prefix]"
-        }
+        },
+        "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',uniqueString(resourceGroup().name))]",
+        "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]"
     },
     "resources": [
         {
@@ -44,7 +46,58 @@
                     }
                 }
             }
-        }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('aspName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/serverfarms.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[variables('aspName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition": false,
+            "apiVersion": "2017-05-10",
+            "name": "[variables('webAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('aspName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "hostingPlanName": {
+                        "value": "[variables('aspName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        }        
     ],
     "outputs": {}
 }

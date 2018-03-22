@@ -77,6 +77,15 @@ Write-Verbose "Importing custom modules."
 Import-Module $moduleFolderPath
 Write-Verbose "Module imported."
 
+<# Register RPs
+$resourceProviders = @("microsoft.web");
+if($resourceProviders.length) {
+    Write-Host "Registering resource providers"
+    foreach($resourceProvider in $resourceProviders) {
+        Register-ResourceProviders($resourceProvider);
+    }
+}
+#>
 $deploymentHash = (Get-StringHash $workloadResourceGroupName).substring(0,10)
 if ($artifactsStorageAccountName -eq $null) {
     $storageAccountName = 'stage' + $deploymentHash

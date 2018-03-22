@@ -24,6 +24,12 @@
                         "AzureSQLAnalytics",
                         "KeyVaultAnalytics"
                     ]
+                },
+                "appServicePlan": {
+                    "prefix": "asp"
+                },
+                "appService": {
+                    "prefix": "webApp"
                 }
             }
         }

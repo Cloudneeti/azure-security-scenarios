@@ -163,5 +163,5 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
             -Container $storageContainerName -Context $storageAccount.Context -Force
     }
 }
-
+#>
 & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose
