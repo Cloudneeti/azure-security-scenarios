@@ -1,0 +1,50 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "type": "secureObject"
+        },
+        "workload": {
+            "type": "secureObject"
+        }
+    },
+    "variables": {
+        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',uniqueString(resourceGroup().name))]",
+        "tags": {
+            "deploymentName": "[parameters('commonReference').deploymentName]",
+            "prefix": "[parameters('commonReference').prefix]"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('omsWorkspaceName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.loganalytics/workspaces.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "omsWorkspaceName": {
+                        "value": "[variables('omsWorkspaceName')]"
+                    },
+                    "omsSolutionsName": {
+                        "value": "[parameters('workload').omsWorkspace.solutions]"
+                    },
+                    "sku": {
+                        "value": "[parameters('workload').omsWorkspace.sku]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

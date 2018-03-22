@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "value": {
+                "deploymentName": "sql-injection-attack-on-webapp",
+                "_artifactsLocation": "auto-update",
+                "_artifactsLocationSasToken": "auto-update",
+                "location": "East US",
+                "deploymentPassword": "GY45s@67hx!K",
+                "prefix": "000"
+            }
+        },
+        "workload": {
+            "value": {
+                "omsWorkspace": {
+                    "prefix": "oms",
+                    "sku": "PerNode",
+                    "solutions": [
+                        "Security",
+                        "AzureActivity",
+                        "AzureWebAppsAnalytics",
+                        "AzureSQLAnalytics",
+                        "KeyVaultAnalytics"
+                    ]
+                }
+            }
+        }
+    }
+}
