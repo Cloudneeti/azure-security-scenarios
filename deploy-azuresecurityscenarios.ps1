@@ -95,7 +95,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 $scenarios = Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json
-$prefix = ($scenarios | Select-Object -expandproperty $Scenario).caseNo
+$prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Help) {
     $scenarios.PSObject.Properties | Select-Object -Property Name ,@{Name="Description"; Expression = {$_.value.description}} | Format-Table
     Break
@@ -103,9 +103,6 @@ if ($Help) {
 $moduleFolderPath = "$PSScriptRoot\common\modules\powershell\asc.poc.psd1"
 Import-Module $moduleFolderPath
 $storageContainerName = "artifacts"
-$artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0,5) + '-rg'
-$deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0,10)
-$storageAccountName = 'stage' + $deploymentHash
 $artifactStagingDirectories = @(
     "$PSScriptRoot\common"
     "$PSScriptRoot\resources"
@@ -124,6 +121,12 @@ if((Get-AzureRmContext).Subscription -eq $null){
         Write-Verbose "Login to Subscription - $SubscriptionId"
         Login-AzureRmAccount -Subscription $SubscriptionId -Credential $credential
     }
+}
+else {
+    $subscriptionId = (Get-AzureRmContext).Subscription.Id
+    $artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0,5) + '-rg'
+    $deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0,10)
+    $storageAccountName = 'stage' + $deploymentHash
 }
 
 if ($Cleanup) {
