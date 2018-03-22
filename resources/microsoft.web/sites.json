@@ -23,13 +23,6 @@
           "type": "string",
           "defaultValue": "[subscription().id]"
       },
-      "appSettings": {
-          "type": "array",
-          "defaultValue": null,
-          "metadata": {
-              "description": "Provide app settings as array for WebApp."
-          }
-      },
       "tags": {
           "type": "object"
       }
@@ -52,10 +45,7 @@
           "properties": {
               "name": "[parameters('name')]",
               "serverFarmId": "[concat('/subscriptions/', parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'), '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]",
-              "hostingEnvironment": "[parameters('hostingEnvironment')]",
-              "siteConfig": {
-                  "appSettings": "[parameters('appSettings')]"
-              }
+              "hostingEnvironment": "[parameters('hostingEnvironment')]"
           },
           "location": "[parameters('location')]"
       }

@@ -28,21 +28,21 @@ param (
     [Parameter(Mandatory = $false,
         ParameterSetName = "Cleanup"
     )]    
-    [ValidateScript({
-        if ( (Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json).PSObject.Properties.Name -contains "$_") {
-            $true
-        }
-        else {
-            throw "Invalid input. Run deploy-azuresecurityscenarios.ps1 -Help to view supported scenario names."
-        }
-    })] 
+    [ValidateScript( {
+            if ( (Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json).PSObject.Properties.Name -contains "$_") {
+                $true
+            }
+            else {
+                throw "Invalid input. Run deploy-azuresecurityscenarios.ps1 -Help to view supported scenario names."
+            }
+        })] 
     [string]
     $Scenario,
 
     [Parameter(Mandatory = $false,
         ParameterSetName = "Deployment"
     )]
-    [ValidateSet("Deploy","Attack","Remediate")] 
+    [ValidateSet("Deploy", "Attack", "Remediate")] 
     [string]
     $Command = "Deploy",
 
@@ -89,7 +89,14 @@ param (
         ParameterSetName = "Cleanup"
     )]
     [switch]
-    $Cleanup
+    $Cleanup,
+
+    # Enter Subscription Id for deployment.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Deployment"
+    )]
+    [switch]
+    $upload
 
 )
 
@@ -97,7 +104,7 @@ $ErrorActionPreference = 'Stop'
 $scenarios = Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json
 $prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Help) {
-    $scenarios.PSObject.Properties | Select-Object -Property Name ,@{Name="Description"; Expression = {$_.value.description}} | Format-Table
+    $scenarios.PSObject.Properties | Select-Object -Property Name , @{Name = "Description"; Expression = {$_.value.description}} | Format-Table
     Break
 }
 $moduleFolderPath = "$PSScriptRoot\common\modules\powershell\asc.poc.psd1"
@@ -107,7 +114,7 @@ $artifactStagingDirectories = @(
     "$PSScriptRoot\common"
     "$PSScriptRoot\resources"
 )
-if((Get-AzureRmContext).Subscription -eq $null){
+if ((Get-AzureRmContext).Subscription -eq $null) {
     if ($SubscriptionId -eq $null -or $UserName -eq $null -or $Password -eq $null) {
         throw "Kindly make sure SubscriptionID, Username and Password parameters are provided during the deployment."
     }
@@ -124,8 +131,8 @@ if((Get-AzureRmContext).Subscription -eq $null){
 }
 else {
     $subscriptionId = (Get-AzureRmContext).Subscription.Id
-    $artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0,5) + '-rg'
-    $deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0,10)
+    $artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
+    $deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
     $storageAccountName = 'stage' + $deploymentHash
 }
 
@@ -155,13 +162,16 @@ else {
     New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
 }
 
-# Copy files from the local storage staging location to the storage account container
-foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
-    $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
-    foreach ($SourcePath in $ArtifactFilePaths) {
-        Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
-            -Container $storageContainerName -Context $storageAccount.Context -Force
-    }
+if ($upload) {
+    # Copy files from the local storage staging location to the storage account container
+    foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
+        $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
+        foreach ($SourcePath in $ArtifactFilePaths) {
+            Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
+                -Container $storageContainerName -Context $storageAccount.Context -Force
+        }
+    }    
 }
-#>
+
+
 & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose

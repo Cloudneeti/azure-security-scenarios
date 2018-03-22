@@ -29,7 +29,7 @@
                     "prefix": "asp"
                 },
                 "appService": {
-                    "prefix": "webApp"
+                    "prefix": "sql-injection-app"
                 }
             }
         }

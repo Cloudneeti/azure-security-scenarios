@@ -70,7 +70,6 @@
             }
         },
         {
-            "condition": false,
             "apiVersion": "2017-05-10",
             "name": "[variables('webAppName')]",
             "type": "Microsoft.Resources/deployments",
@@ -97,7 +96,7 @@
                     }
                 }
             }
-        }        
+        }
     ],
     "outputs": {}
 }
