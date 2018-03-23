@@ -20,7 +20,8 @@
         "webAppSettings": {
             "administrator": "shab",
             "password": "P@ssw0rd"
-        }
+        },
+        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]"
     },
     "resources": [
         {
@@ -147,6 +148,66 @@
                     },
                     "packageUri": {
                         "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/packages/contosoclinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('sqlServerName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.v12.0.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "administratorLogin":{
+                        "value": "[parameters('workload').sqlServer.administratorName]"
+                    },
+                    "administratorLoginPassword":{
+                        "value": "[parameters('commonReference').deploymentPassword]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[parameters('workload').sqlServer.databases[0].name]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('omsWorkspaceName')]",
+                "[variables('sqlServerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.databases.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "databaseName":{
+                        "value": "[parameters('workload').sqlServer.databases[0].name]"
+                    },
+                    "omsWorkspaceResourceId":{
+                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"

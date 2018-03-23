@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlServerName": {
+            "type": "string"
+        },
+        "location":{
+            "type": "string"
+        },
+        "sqlADAdministratorLogin":{
+            "type": "string"
+        },
+        "sqlADlAdministratorSid":{
+            "type": "string"
+        },
+        "tenantId":{
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('sqlServerName'),'/activeDirectory')]",
+            "type": "Microsoft.Sql/servers/administrators",
+            "apiVersion": "2014-04-01",
+            "location": "[parameters('location')]",
+            "properties": {
+              "administratorType": "ActiveDirectory",
+              "login": "[parameters('sqlADAdministratorLogin')]",
+              "sid": "[parameters('sqlADlAdministratorSid')]",
+              "tenantId": "[parameters('tenantId')]"
+            }
+        }
+
+    ]
+}

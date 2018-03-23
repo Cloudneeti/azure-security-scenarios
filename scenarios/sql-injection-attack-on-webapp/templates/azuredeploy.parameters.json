@@ -30,6 +30,15 @@
                 },
                 "appService": {
                     "prefix": "sql-injection-app"
+                },
+                "sqlServer": {
+                    "prefix": "sql-without-td",
+                    "administratorName": "sqlAdmin",
+                    "databases": [
+                        {
+                            "name": "contosoclinic"
+                        }
+                    ]
                 }
             }
         }
