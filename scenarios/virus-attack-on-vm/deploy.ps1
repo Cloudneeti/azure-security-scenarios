@@ -134,7 +134,7 @@ $parametersObj = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.paramete
 Write-Verbose "Updating parameter file."
 $parametersObj.parameters.commonReference.value._artifactsLocation = $commonTemplateParameters[$artifactsLocation]
 $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
-$parametersObj.parameters.commonReference.value.caseNo = $Prefix
+$parametersObj.parameters.commonReference.value.prefix = $Prefix
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"

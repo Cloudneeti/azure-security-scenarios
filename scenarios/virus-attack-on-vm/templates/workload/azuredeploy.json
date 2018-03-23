@@ -19,7 +19,7 @@
         "nsgName": "[concat(parameters('workload').nsg.prefix,'-',uniqueString(resourceGroup().name))]",
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
-            "caseNo": "[parameters('commonReference').caseNo]"
+            "prefix": "[parameters('commonReference').prefix]"
         }
     },
     "resources": [

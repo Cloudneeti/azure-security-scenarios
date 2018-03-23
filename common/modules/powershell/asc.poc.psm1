@@ -169,8 +169,21 @@ function Set-DeploymentArtifacts (
     }
 }
 
+<#
+.SYNOPSIS
+    Registers RPs
+#>
+Function Register-ResourceProviders {
+    Param(
+        [string]$ResourceProviderNamespace
+    )
+
+    Write-Host "Registering resource provider '$ResourceProviderNamespace'";
+    Register-AzureRmResourceProvider -ProviderNamespace $ResourceProviderNamespace;
+}
+
 # Export only the functions using PowerShell standard verb-noun naming.
 # Be sure to list each exported functions in the FunctionsToExport field of the module manifest file.
 # This improves performance of command discovery in PowerShell.
-Export-ModuleMember -Function Get-StringHash, Install-RequiredModules, New-RandomPassword, Set-DeploymentArtifacts
+Export-ModuleMember -Function Get-StringHash, Install-RequiredModules, New-RandomPassword, Set-DeploymentArtifacts, Register-ResourceProviders
 Export-ModuleMember -Variable testCasesCode, rootFolder

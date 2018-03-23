@@ -1,0 +1,220 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "type": "secureObject"
+        },
+        "workload": {
+            "type": "secureObject"
+        }
+    },
+    "variables": {
+        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',uniqueString(resourceGroup().name))]",
+        "tags": {
+            "deploymentName": "[parameters('commonReference').deploymentName]",
+            "prefix": "[parameters('commonReference').prefix]"
+        },
+        "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',uniqueString(resourceGroup().name))]",
+        "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]",
+        "webAppSettings": {
+            "administrator": "shab",
+            "password": "P@ssw0rd"
+        },
+        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('omsWorkspaceName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.loganalytics/workspaces.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "omsWorkspaceName": {
+                        "value": "[variables('omsWorkspaceName')]"
+                    },
+                    "omsSolutionsName": {
+                        "value": "[parameters('workload').omsWorkspace.solutions]"
+                    },
+                    "sku": {
+                        "value": "[parameters('workload').omsWorkspace.sku]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('aspName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/serverfarms.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[variables('aspName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('webAppName')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('aspName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "name": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "hostingPlanName": {
+                        "value": "[variables('aspName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-appsettings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('webAppName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.config.appsettings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "appSettings": {
+                        "value": "[variables('webAppSettings')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-msdeploy')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat(variables('webAppName'),'-appsettings')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.extensions.msdeploy.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "packageUri": {
+                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/packages/contosoclinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('sqlServerName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.v12.0.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "administratorLogin":{
+                        "value": "[parameters('workload').sqlServer.administratorName]"
+                    },
+                    "administratorLoginPassword":{
+                        "value": "[parameters('commonReference').deploymentPassword]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[parameters('workload').sqlServer.databases[0].name]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('omsWorkspaceName')]",
+                "[variables('sqlServerName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.databases.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "databaseName":{
+                        "value": "[parameters('workload').sqlServer.databases[0].name]"
+                    },
+                    "omsWorkspaceResourceId":{
+                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
