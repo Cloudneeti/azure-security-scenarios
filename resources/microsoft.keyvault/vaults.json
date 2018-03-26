@@ -11,7 +11,8 @@
             "defaultValue": "eastus"
         },
         "tenantId":{
-            "type": "securestring"
+            "type": "securestring",
+            "defaultValue": "[subscription().tenantId]"
         },
         "skuName":{
             "type": "string",

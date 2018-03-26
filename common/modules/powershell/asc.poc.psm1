@@ -179,7 +179,7 @@ Function Register-ResourceProviders {
     )
 
     Write-Host "Registering resource provider '$ResourceProviderNamespace'";
-    Register-AzureRmResourceProvider -ProviderNamespace $ResourceProviderNamespace;
+    Register-AzureRmResourceProvider -ProviderNamespace $ResourceProviderNamespace
 }
 
 # Export only the functions using PowerShell standard verb-noun naming.

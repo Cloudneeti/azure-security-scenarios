@@ -52,6 +52,14 @@ $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pas
 $artifactsLocation = '_artifactsLocation'
 $artifactsLocationSasToken = '_artifactsLocationSasToken'
 $storageContainerName = "artifacts"
+$aadAppDisplayName = $deploymentName
+$parametersObj = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
+$aadAppHomepage = "http://$deploymentName"
+$aadAppIdentifierUris = $aadAppHomepage
+$deploymentPassword = $parametersObj.parameters.commonReference.value.deploymentPassword
+$secureDeploymentPassword = $deploymentPassword | ConvertTo-SecureString -AsPlainText -Force
+$tenantId = (Get-AzureRmContext).Tenant.TenantId
+if ($tenantId -eq $null){$tenantId = (Get-AzureRmContext).Tenant.Id}
 
 if((Get-AzureRmContext).Subscription -eq $null){
     if ($SubscriptionId -eq $null -or $UserName -eq $null -or $Password -eq $null) {
@@ -77,12 +85,18 @@ Write-Verbose "Importing custom modules."
 Import-Module $moduleFolderPath
 Write-Verbose "Module imported."
 
-<# Register RPs
-$resourceProviders = @("microsoft.web");
+# Register RPs
+$resourceProviders = @(
+    "Microsoft.Storage",
+    "Microsoft.Compute",
+    "Microsoft.KeyVault",
+    "Microsoft.Network",
+    "Microsoft.Web"
+)
 if($resourceProviders.length) {
     Write-Host "Registering resource providers"
     foreach($resourceProvider in $resourceProviders) {
-        Register-ResourceProviders($resourceProvider);
+        Register-ResourceProviders -ResourceProviderNamespace $resourceProvider
     }
 }
 #>
@@ -132,14 +146,29 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
 $commonTemplateParameters[$artifactsLocation] = $storageAccount.Context.BlobEndPoint + $storageContainerName
 $commonTemplateParameters[$artifactsLocationSasToken] = New-AzureStorageContainerSASToken -Container $storageContainerName -Context $storageAccount.Context -Permission r -ExpiryTime (Get-Date).AddHours(4)
 
+########### Create Azure Active Directory apps in default directory ###########
+Write-Verbose -Message "Create Azure AD application in Default directory"
+
+if ((Get-AzureRmADApplication -IdentifierUri $aadAppIdentifierUris) -eq $null) {
+    $aadApplication = New-AzureRmADApplication -DisplayName $aadAppDisplayName -HomePage $aadAppHomepage -IdentifierUris $aadAppIdentifierUris -Password $secureDeploymentPassword
+    $aadApplicationClientId = $aadApplication.ApplicationId.Guid
+    $aadApplicationObjectId = $aadApplication.ObjectId.Guid
+    Write-Verbose -Message "Azure Active Directory apps creation successful. AppID is $aadApplicationClientId"
+}
+else {
+    $aadApplication = Get-AzureRmADApplication -IdentifierUri $aadAppIdentifierUris
+    $aadApplicationClientId = $aadApplication.ApplicationId.Guid
+    $aadApplicationObjectId = $aadApplication.ObjectId.Guid
+}
 
 # Update parameter file with deployment values.
-Write-Verbose "Get Parameter file"
-$parametersObj = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
 Write-Verbose "Updating parameter file."
 $parametersObj.parameters.commonReference.value._artifactsLocation = $commonTemplateParameters[$artifactsLocation]
 $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
 $parametersObj.parameters.commonReference.value.prefix = $Prefix
+$parametersObj.parameters.workload.value.keyVault.accessPolicies[0].applicationId = $aadApplicationClientId
+$parametersObj.parameters.workload.value.keyVault.accessPolicies[0].objectId = $aadApplicationObjectId
+$parametersObj.parameters.workload.value.keyVault.accessPolicies[0].tenantId = $tenantId
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"

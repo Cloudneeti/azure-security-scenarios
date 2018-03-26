@@ -21,7 +21,8 @@
             "administrator": "shab",
             "password": "P@ssw0rd"
         },
-        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]"
+        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
+        "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]"
     },
     "resources": [
         {
@@ -147,7 +148,7 @@
                         "value": "[parameters('commonReference').location]"
                     },
                     "packageUri": {
-                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/packages/contosoclinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/artifacts/ContosoWebStore.zip',parameters('commonReference')._artifactsLocationSasToken)]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
@@ -214,7 +215,38 @@
                     }
                 }
             }
-        }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('keyVaultName')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('omsWorkspaceName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.keyvault/vaults.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "keyVaultName": {
+                        "value": "[variables('keyVaultName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "omsWorkspaceResourceId":{
+                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    },
+                    "accessPolicies": {
+                        "value": "[parameters('workload').keyVault.accessPolicies]"
+                    }
+                }
+            }
+        }        
     ],
     "outputs": {}
 }
