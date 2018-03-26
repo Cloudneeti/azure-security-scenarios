@@ -89,14 +89,7 @@ param (
         ParameterSetName = "Cleanup"
     )]
     [switch]
-    $Cleanup,
-
-    # Enter Subscription Id for deployment.
-    [Parameter(Mandatory = $false,
-        ParameterSetName = "Deployment"
-    )]
-    [switch]
-    $upload
+    $Cleanup
 
 )
 
@@ -161,17 +154,15 @@ if ($storageAccount -eq $null) {
 else {
     New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
 }
-
-if ($upload) {
-    # Copy files from the local storage staging location to the storage account container
-    foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
-        $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
-        foreach ($SourcePath in $ArtifactFilePaths) {
-            Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
-                -Container $storageContainerName -Context $storageAccount.Context -Force
-        }
-    }    
+#
+# Copy files from the local storage staging location to the storage account container
+foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
+    $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
+    foreach ($SourcePath in $ArtifactFilePaths) {
+        Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
+            -Container $storageContainerName -Context $storageAccount.Context -Force
+    }
 }
-
+#>
 
 & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose
