@@ -23,7 +23,92 @@
         },
         "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
         "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]",
-        "diagStorageAccName": "[toLower(concat(parameters('commonReference').prefix,'diag',uniqueString(resourceGroup().name)))]"
+        "diagStorageAccName": "[toLower(concat(parameters('commonReference').prefix,'diag',uniqueString(resourceGroup().name)))]",
+        
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'),'/subnets/',parameters('wafSubnetName'))]",
+        "publicIpRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIpAddressName'))]",
+        "applicationGatewayId": "[resourceId('Microsoft.Network/applicationGateways',variables('applicationGatewayName'))]",
+        "probeAseHttps": "aseProbeHTTPS"
+        "applicationGateway": {
+            "gatewayIPConfigurations": [
+                {
+                    "name": "appGatewayIpConfig",
+                    "properties": {
+                        "subnet": {
+                            "id": "[variables('subnetRef')]"
+                        }
+                    }
+                }
+            ],
+            "frontendPorts": [
+                {
+                    "name": "appGatewayFrontendPort",
+                    "properties": {
+                        "Port": 80
+                    }
+                }
+            ],
+            "backendAddressPools": [
+                {
+                    "name": "appGatewayBackendPool",
+                    "properties": {
+                        "BackendAddresses": [
+                            {
+                                "fqdn": "[parameters('webappurl')]"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "backendHttpSettingsCollection": [
+                {
+                    "name": "appGatewayBackendHttpSettings",
+                    "properties": {
+                        "Port": 80,
+                        "Protocol": "Http",
+                        "CookieBasedAffinity": "Disabled",
+                        "pickHostNameFromBackendAddress": "true",
+                        "Probe": {
+                          "id": "[concat(variables('applicationGatewayID'),'/probes/',variables('probeAseHttp'))]"
+                        }
+                    }
+                }
+            ],
+            "httpListeners": [
+                {
+                    "name": "appGatewayHttpListener",
+                    "properties": {
+                        "FrontendIPConfiguration": {
+                            "Id": "[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/appGatewayFrontendIP')]"
+                        },
+                        "FrontendPort": {
+                            "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
+                        },
+                        "Protocol": "Http",
+                        "SslCertificate": null
+                    }
+                }
+            ],
+            "requestRoutingRules": [
+                {
+                    "Name": "rule1",
+                    "properties": {
+                        "RuleType": "Basic",
+                        "httpListener": {
+                            "id": "[concat(variables('applicationGatewayID'), '/httpListeners/appGatewayHttpListener')]"
+                        },
+                        "backendAddressPool": {
+                            "id": "[concat(variables('applicationGatewayID'), '/backendAddressPools/appGatewayBackendPool')]"
+                        },
+                        "backendHttpSettings": {
+                            "id": "[concat(variables('applicationGatewayID'), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+                        }
+                    }
+                }
+            ],            
+            
+        }
     },
     "resources": [
         {
