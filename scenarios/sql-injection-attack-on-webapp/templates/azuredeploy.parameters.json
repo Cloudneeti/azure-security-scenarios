@@ -29,7 +29,8 @@
                     "prefix": "asp"
                 },
                 "appService": {
-                    "prefix": "sql-injection-app"
+                    "prefix": "sql-injection-app",
+                    "connectionType": "SQLAzure"
                 },
                 "sqlServer": {
                     "prefix": "sql-without-td",
@@ -62,7 +63,7 @@
                             ]
                           }
                         }
-                      ]
+                    ]
                 }
             }
         }

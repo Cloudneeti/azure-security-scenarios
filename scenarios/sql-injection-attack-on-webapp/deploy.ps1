@@ -223,18 +223,13 @@ Write-Verbose -Message "Importing SQL bacpac and Updating Azure SQL DB Data Mask
 # Importing bacpac file
 Write-Verbose -Message "Importing SQL backpac from release artifacts storage account."
 $sqlBacpacUri = "$artifactsLocation/$deploymentName/artifacts/ContosoPayments.bacpac"
-try {
-    New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -StorageKeytype $artifactsStorageAccKeyType -StorageKey $artifactsStorageAccKey -StorageUri "$sqlBacpacUri" -AdministratorLogin 'sqlAdmin' -AdministratorLoginPassword $secureDeploymentPassword -Edition Standard -ServiceObjectiveName S0 -DatabaseMaxSizeBytes 50000
-}
-catch {
-    $_
-}
+New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -StorageKeytype $artifactsStorageAccKeyType -StorageKey $artifactsStorageAccKey -StorageUri "$sqlBacpacUri" -AdministratorLogin 'sqlAdmin' -AdministratorLoginPassword $secureDeploymentPassword -Edition Standard -ServiceObjectiveName S0 -DatabaseMaxSizeBytes 50000 -ErrorAction SilentlyContinue
 
 Start-Sleep -Seconds 100
 
 Write-Verbose -Message "Updating Azure SQL DB Data masking policy on FirstName & LastName Column."
 Set-AzureRmSqlDatabaseDataMaskingPolicy -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -DataMaskingState Enabled
-Start-Sleep -s 60
+Start-Sleep -s 180
 New-AzureRmSqlDatabaseDataMaskingRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -SchemaName "dbo" -TableName "Customers" -ColumnName "FirstName" -MaskingFunction Default
 New-AzureRmSqlDatabaseDataMaskingRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -SchemaName "dbo" -TableName "Customers" -ColumnName "LastName" -MaskingFunction Default
 

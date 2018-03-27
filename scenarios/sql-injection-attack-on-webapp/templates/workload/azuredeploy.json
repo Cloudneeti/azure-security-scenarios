@@ -18,8 +18,8 @@
         "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',uniqueString(resourceGroup().name))]",
         "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]",
         "webAppSettings": {
-            "administrator": "shab",
-            "password": "P@ssw0rd"
+            "applicationADID": "[parameters('workload').keyVault.accessPolicies[0].applicationId]",
+            "applicationADSecret": "[parameters('commonReference').deploymentPassword]"
         },
         "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
         "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]"
@@ -152,6 +152,34 @@
                     },
                     "tags": {
                         "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-connectionStrings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat(variables('webAppName'),'-appsettings')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.config.connectionstrings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "connectionType": {
+                        "value": "[parameters('workload').appService.connectionType]"
+                    },
+                    "connectionString": {
+                        "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', parameters('workload').sqlServer.databases[0].name, ';User Id=', parameters('workload').sqlServer.administratorName, ';Password=', parameters('commonReference').deploymentPassword, ';Column Encryption Setting=Enabled;Encrypt=True;TrustServerCertificate=False;Connection Timeout=300;')]"
                     }
                 }
             }

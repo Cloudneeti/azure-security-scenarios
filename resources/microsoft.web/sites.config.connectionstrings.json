@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-      "functionAppName": {
+      "webAppName": {
           "type": "string"
       },
       "location": {
@@ -31,12 +31,12 @@
   },
   "resources": [
     {
-      "name": "[concat(parameters('functionAppName'),'/connectionstrings')]",
+      "name": "[concat(parameters('webAppName'),'/connectionstrings')]",
       "apiVersion": "2016-08-01",
       "type": "Microsoft.Web/sites/config",
       "location": "[parameters('location')]",
       "properties": {
-        "PatientDb": {
+        "DefaultConnection": {
           "value": "[parameters('connectionString')]",
           "type": "[parameters('connectionType')]"
         }
