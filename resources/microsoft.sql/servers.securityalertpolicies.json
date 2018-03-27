@@ -2,13 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "sqlServerName": {
+            "type": "string"
+        },
         "storageAccountName": {
             "type": "string",
             "defaultValue": "storageaccountname"
-        },
-        "storageEndpoint": {
-            "type": "string",
-            "defaultValue": "[concat('https://',parameters('storageAccountName'),'.blob.core.windows.net')]"
         },
         "sendAlertsTo": {
             "type": "string",
@@ -20,15 +19,15 @@
     "resources": [
         {
             "apiVersion": "2015-05-01-preview",
-            "type": "securityAlertPolicies",
-            "name": "default",
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "name": "[concat(parameters('sqlServerName'), '/', 'default')]",
             "properties": {
                 "state": "Enabled",
                 "disabledAlerts": "",
                 "emailAddresses": "[parameters('sendAlertsTo')]",
-                "storageEndpoint": "[parameters('storageEndpoint')]",
+                "storageEndpoint": "[concat('https://',parameters('storageAccountName'),'.blob.core.windows.net')]",
                 "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').keys[0].value]",
-                "retentionDays": 0
+                "retentionDays": 0
             }
         }
     ]
