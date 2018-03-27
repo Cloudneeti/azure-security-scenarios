@@ -39,7 +39,8 @@
                         {
                             "name": "ContosoPayments"
                         }
-                    ]
+                    ],
+                    "sendAlertsTo": "auto-update"
                 },
                 "keyVault": {
                     "prefix": "kv-for-tde",

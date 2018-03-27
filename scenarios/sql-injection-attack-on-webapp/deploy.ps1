@@ -31,7 +31,12 @@ param (
     # Provide artifacts storage account name.
     [Parameter(Mandatory = $false)]
     [string]
-    $artifactsStorageAccountName = $null
+    $artifactsStorageAccountName = $null,
+
+    [Parameter(Mandatory = $true)]
+    [Alias("email")]
+    [string]
+    $EmailAddressForAlerts
 
 )
 
@@ -202,6 +207,7 @@ $parametersObj.parameters.commonReference.value.prefix = $Prefix
 $parametersObj.parameters.workload.value.keyVault.accessPolicies[0].applicationId = $aadApplicationClientId
 $parametersObj.parameters.workload.value.keyVault.accessPolicies[0].objectId = $aadApplicationObjectId
 $parametersObj.parameters.workload.value.keyVault.accessPolicies[0].tenantId = $tenantId
+$parametersObj.parameters.workload.value.sqlServer.sendAlertsTo = $EmailAddressForAlerts
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
@@ -224,9 +230,7 @@ Write-Verbose -Message "Importing SQL bacpac and Updating Azure SQL DB Data Mask
 Write-Verbose -Message "Importing SQL backpac from release artifacts storage account."
 $sqlBacpacUri = "$artifactsLocation/$deploymentName/artifacts/ContosoPayments.bacpac"
 New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -StorageKeytype $artifactsStorageAccKeyType -StorageKey $artifactsStorageAccKey -StorageUri "$sqlBacpacUri" -AdministratorLogin 'sqlAdmin' -AdministratorLoginPassword $secureDeploymentPassword -Edition Standard -ServiceObjectiveName S0 -DatabaseMaxSizeBytes 50000 -ErrorAction SilentlyContinue
-
 Start-Sleep -Seconds 100
-
 Write-Verbose -Message "Updating Azure SQL DB Data masking policy on FirstName & LastName Column."
 Set-AzureRmSqlDatabaseDataMaskingPolicy -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -DataMaskingState Enabled
 Start-Sleep -s 180
@@ -234,48 +238,43 @@ New-AzureRmSqlDatabaseDataMaskingRule -ResourceGroupName $workloadResourceGroupN
 New-AzureRmSqlDatabaseDataMaskingRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -SchemaName "dbo" -TableName "Customers" -ColumnName "LastName" -MaskingFunction Default
 
 # Encrypting Credit card information within database
-try {
-    Write-Host ("`nStep 12: Encrypt SQL DB column Credit card Information" ) -ForegroundColor Green
-    # Connect to your database.
-    Add-Type -Path $sqlsmodll
-    Write-Host -ForegroundColor Yellow "`t* Connecting database - $databaseName on $sqlServerName"
-    $connStr = "Server=tcp:" + $sqlServerName + ".database.windows.net,1433;Initial Catalog=" + "`"" + $databaseName + "`"" + ";Persist Security Info=False;User ID=" + "`"" + "sqladmin" + "`"" + ";Password=`"" + "$deploymentPassword" + "`"" + ";MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-    $connection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
-    $connection.ConnectionString = $connStr
-    $connection.Connect()
-    $server = New-Object Microsoft.SqlServer.Management.Smo.Server($connection)
-    $database = $server.Databases[$databaseName]
+Write-Verbose "Encrypt SQL DB column Credit card Information"
+# Connect to your database.
+Add-Type -Path $sqlsmodll
+Write-Verbose "Connecting database - $databaseName on $sqlServerName"
+$connStr = "Server=tcp:" + $sqlServerName + ".database.windows.net,1433;Initial Catalog=" + "`"" + $databaseName + "`"" + ";Persist Security Info=False;User ID=" + "`"" + "sqladmin" + "`"" + ";Password=`"" + "$deploymentPassword" + "`"" + ";MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+$connection = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
+$connection.ConnectionString = $connStr
+$connection.Connect()
+$server = New-Object Microsoft.SqlServer.Management.Smo.Server($connection)
+$database = $server.Databases[$databaseName]
 
-    #Granting Users & ServicePrincipal full access on Keyvault
-    Write-Host ("`t* Giving Key Vault access permissions to the Users and ServicePrincipal ..") -ForegroundColor Yellow
-    $KeyVaultName = ($allResource | Where-Object ResourceType -eq 'Microsoft.KeyVault/vaults').ResourceName
-    Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyVaultName -UserPrincipalName $userPrincipalName -ResourceGroupName $workloadResourceGroupName -PermissionsToKeys all -PermissionsToSecrets all
-    Write-Host ("`t* Granted permissions to the users and serviceprincipals ..") -ForegroundColor Yellow
-    Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyVaultName -ServicePrincipalName $aadApplicationClientId -ResourceGroupName $workloadResourceGroupName -PermissionsToKeys all -PermissionsToSecrets all
+#Granting Users & ServicePrincipal full access on Keyvault
+Write-Verbose "Giving Key Vault access permissions to the Users and ServicePrincipal .."
+$KeyVaultName = ($allResource | Where-Object ResourceType -eq 'Microsoft.KeyVault/vaults').ResourceName
+Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyVaultName -UserPrincipalName $userPrincipalName -ResourceGroupName $workloadResourceGroupName -PermissionsToKeys all -PermissionsToSecrets all
+Write-Verbose "Granted permissions to the users and serviceprincipals."
+Set-AzureRmKeyVaultAccessPolicy -VaultName $KeyVaultName -ServicePrincipalName $aadApplicationClientId -ResourceGroupName $workloadResourceGroupName -PermissionsToKeys all -PermissionsToSecrets all
 
-    # Creating KeyVault Key to encrypt DB
-    Write-Host -ForegroundColor Yellow "`t* Creating a New Keyvault key."
-    $key = (Add-AzureKeyVaultKey -VaultName $KeyVaultName -Name $keyName -Destination 'Software').ID
+# Creating KeyVault Key to encrypt DB
+Write-Verbose "Creating a Keyvault Key"
+$key = (Add-AzureKeyVaultKey -VaultName $KeyVaultName -Name $keyName -Destination 'Software').ID
 
-    # Switching SQL commands context to the AD Application
-    Write-Host -ForegroundColor Yellow "`t* Creating SQL Column Master Key & Column Encryption Key."
-    $cmkSettings = New-SqlAzureKeyVaultColumnMasterKeySettings -KeyURL $key
-    $sqlMasterKey = Get-SqlColumnMasterKey -Name $cmkName -InputObject $database -ErrorAction SilentlyContinue
-    if ($sqlMasterKey) {Write-Host -ForegroundColor Yellow "`t* SQL Master Key $cmkName already exists."} 
-    Else {New-SqlColumnMasterKey -Name $cmkName -InputObject $database -ColumnMasterKeySettings $cmkSettings}
-    Add-SqlAzureAuthenticationContext -ClientID $aadApplicationClientId -Secret $deploymentPassword -Tenant $tenantID
-    New-SqlColumnEncryptionKey -Name $cekName -InputObject $database -ColumnMasterKey $cmkName
+# Switching SQL commands context to the AD Application
+Write-Verbose "Creating SQL Column Master Key & Column Encryption Key"
+$cmkSettings = New-SqlAzureKeyVaultColumnMasterKeySettings -KeyURL $key
+$sqlMasterKey = Get-SqlColumnMasterKey -Name $cmkName -InputObject $database -ErrorAction SilentlyContinue
+if ($sqlMasterKey) {Write-Host -ForegroundColor Yellow "SQL Master Key $cmkName already exists."} 
+Else {New-SqlColumnMasterKey -Name $cmkName -InputObject $database -ColumnMasterKeySettings $cmkSettings}
+Add-SqlAzureAuthenticationContext -ClientID $aadApplicationClientId -Secret $deploymentPassword -Tenant $tenantID
+New-SqlColumnEncryptionKey -Name $cekName -InputObject $database -ColumnMasterKey $cmkName
 
-    Write-Host -ForegroundColor Yellow "`t* SQL encryption has been successfully created. Encrypting SQL Columns.."
-    # Encrypt the selected columns (or re-encrypt, if they are already encrypted using keys/encrypt types, different than the specified keys/types.
-    $ces = @()
-    $ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Number" -EncryptionType "Deterministic" -EncryptionKey $cekName
-    $ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Code" -EncryptionType "Deterministic" -EncryptionKey $cekName
-    $ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Expiration" -EncryptionType "Deterministic" -EncryptionKey $cekName
-    Set-SqlColumnEncryption -InputObject $database -ColumnEncryptionSettings $ces
-    Write-Host -ForegroundColor Yellow "`t* Column CreditCard_Number, CreditCard_Code, CreditCard_Expiration have been successfully encrypted"            
-}
-catch {
-    Write-Host -ForegroundColor Red "`t Column encryption has failed."
-    throw $_
-}
+Write-Verbose "SQL encryption has been successfully created. Encrypting SQL Columns"
+# Encrypt the selected columns (or re-encrypt, if they are already encrypted using keys/encrypt types, different than the specified keys/types.
+$ces = @()
+$ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Number" -EncryptionType "Deterministic" -EncryptionKey $cekName
+$ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Code" -EncryptionType "Deterministic" -EncryptionKey $cekName
+$ces += New-SqlColumnEncryptionSettings -ColumnName "dbo.Customers.CreditCard_Expiration" -EncryptionType "Deterministic" -EncryptionKey $cekName
+Set-SqlColumnEncryption -InputObject $database -ColumnEncryptionSettings $ces
+Write-Verbose "Column CreditCard_Number, CreditCard_Code, CreditCard_Expiration have been successfully encrypted"
+#>

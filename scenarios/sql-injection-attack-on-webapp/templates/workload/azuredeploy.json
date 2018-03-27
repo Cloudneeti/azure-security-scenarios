@@ -22,9 +22,32 @@
             "applicationADSecret": "[parameters('commonReference').deploymentPassword]"
         },
         "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
-        "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]"
+        "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]",
+        "diagStorageAccName": "[toLower(concat(parameters('commonReference').prefix,'diag',uniqueString(resourceGroup().name)))]"
     },
     "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('diagStorageAccName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.storage/storageaccounts.storage.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
         {
             "apiVersion": "2017-05-10",
             "name": "[variables('omsWorkspaceName')]",
@@ -200,14 +223,62 @@
                     "location": {
                         "value": "[parameters('commonReference').location]"
                     },
-                    "administratorLogin":{
+                    "administratorLogin": {
                         "value": "[parameters('workload').sqlServer.administratorName]"
                     },
-                    "administratorLoginPassword":{
+                    "administratorLoginPassword": {
                         "value": "[parameters('commonReference').deploymentPassword]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('sqlServerName'),'-auditingSettings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('sqlServerName')]",
+                "[variables('diagStorageAccName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.auditingsettings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('sqlServerName'),'-securityAlertPolicies')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat(variables('sqlServerName'),'-auditingSettings')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.securityalertpolicies.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    },
+                    "sendAlertsTo": {
+                        "value": "[parameters('workload').sqlServer.sendAlertsTo]"
                     }
                 }
             }
@@ -232,10 +303,10 @@
                     "location": {
                         "value": "[parameters('commonReference').location]"
                     },
-                    "databaseName":{
+                    "databaseName": {
                         "value": "[parameters('workload').sqlServer.databases[0].name]"
                     },
-                    "omsWorkspaceResourceId":{
+                    "omsWorkspaceResourceId": {
                         "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
                     },
                     "tags": {
@@ -263,7 +334,7 @@
                     "location": {
                         "value": "[parameters('commonReference').location]"
                     },
-                    "omsWorkspaceResourceId":{
+                    "omsWorkspaceResourceId": {
                         "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
                     },
                     "tags": {
@@ -274,7 +345,7 @@
                     }
                 }
             }
-        }        
+        }
     ],
     "outputs": {}
 }
