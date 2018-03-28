@@ -6,7 +6,8 @@
             "type": "string"
         },
         "publicIPAddressType": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "Dynamic"
         },
         "dnsNameForPublicIP": {
             "type": "string",
