@@ -71,9 +71,6 @@
                 "description": "WAF Rule Set Version"
             }
         },
-        "publicIPAddressName": {
-            "type": "string"
-        },
         "applicationGatewayName": {
             "type": "string"
         },
@@ -96,6 +93,9 @@
             "type": "array"
         },
         "requestRoutingRules": {
+            "type": "array"
+        },
+        "probes": {
             "type": "array"
         }
     },
@@ -133,6 +133,13 @@
                     "ruleSetType": "[parameters('wafRuleSetType')]",
                     "ruleSetVersion": "[parameters('wafRuleSetVersion')]",
                     "disabledRuleGroups": []
+                },
+                "probes": "[parameters('probes')]",
+                "sslPolicy": {
+                    "disabledSslProtocols": [
+                        "TLSv1_0",
+                        "TLSv1_1"
+                    ]
                 }
             }
         }
