@@ -97,6 +97,9 @@
         },
         "probes": {
             "type": "array"
+        },
+        "omsWorkspaceResourceId": {
+            "type": "string"
         }
     },
     "resources": [
@@ -141,7 +144,56 @@
                         "TLSv1_1"
                     ]
                 }
-            }
+            },
+            "resources": [
+                {
+                    "type": "providers/diagnosticSettings",
+                    "name": "Microsoft.Insights/service",
+                    "apiVersion": "2015-07-01",
+                    "dependsOn" : [
+                        "[parameters('applicationGatewayName')]"
+                    ], 
+                    "properties": {
+                        "workspaceId": "[parameters('omsWorkspaceResourceId')]",
+                        "logs": [
+                            {
+                                "category": "ApplicationGatewayAccessLog",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 90,
+                                    "enabled": true
+                                }
+                            },
+                            {
+                                "category": "ApplicationGatewayPerformanceLog",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 90,
+                                    "enabled": false
+                                }
+                            },
+                            {
+                                "category": "ApplicationGatewayFirewallLog",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "days": 90,
+                                    "enabled": false
+                                }
+                            }
+                        ],
+                        "metrics": [
+                            {
+                                "category": "AllMetrics",
+                                "enabled": true,
+                                "retentionPolicy": {
+                                    "enabled": false,
+                                    "days": 0
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     ]
 }

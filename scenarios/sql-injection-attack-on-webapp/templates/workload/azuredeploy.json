@@ -44,8 +44,6 @@
         ],
         "probeAseHttp": "aseProbeHTTP",
         "probeAseHttps": "aseProbeHTTPS"
-        
-    
     },
     "resources": [
         {
@@ -172,7 +170,7 @@
                                     "CookieBasedAffinity": "Disabled",
                                     "pickHostNameFromBackendAddress": "true",
                                     "Probe": {
-                                      "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name),'/probes/',variables('probeAseHttp'))]"
+                                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name),'/probes/',variables('probeAseHttp'))]"
                                     }
                                 }
                             }
@@ -219,28 +217,33 @@
                             {
                                 "name": "[variables('probeAseHttp')]",
                                 "properties": {
-                                  "protocol": "Http",
-                                  "host": "[variables('webAppUrl')]",
-                                  "path": "/",
-                                  "interval": 30,
-                                  "timeout": 30,
-                                  "unhealthyThreshold": 8
+                                    "protocol": "Http",
+                                    "host": "[variables('webAppUrl')]",
+                                    "path": "/",
+                                    "interval": 30,
+                                    "timeout": 30,
+                                    "unhealthyThreshold": 8
                                 }
-                              },
-                              {
+                            },
+                            {
                                 "name": "[variables('probeAseHttps')]",
                                 "properties": {
-                                  "protocol": "Https",
-                                  "host": "[variables('webAppUrl')]",
-                                  "path": "/",
-                                  "interval": 30,
-                                  "timeout": 30,
-                                  "unhealthyThreshold": 8
+                                    "protocol": "Https",
+                                    "host": "[variables('webAppUrl')]",
+                                    "path": "/",
+                                    "interval": 30,
+                                    "timeout": 30,
+                                    "unhealthyThreshold": 8
                                 }
-                              }
+                            }
                         ]
                     },
-                    "wafMode": "[variables('applicationGateway')[copyIndex()].wafMode]"
+                    "wafMode": {
+                        "value": "[variables('applicationGateway')[copyIndex()].wafMode]"
+                    },
+                    "omsWorkspaceResourceId": {
+                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces',variables('omsWorkspaceName'))]"
+                    }
                 }
             }
         },
