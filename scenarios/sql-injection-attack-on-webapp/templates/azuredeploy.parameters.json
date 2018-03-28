@@ -63,34 +63,10 @@
                     "administratorName": "sqlAdmin",
                     "databases": [
                         {
-                            "name": "ContosoPayments"
+                            "name": "clinic"
                         }
                     ],
                     "sendAlertsTo": "auto-update"
-                },
-                "keyVault": {
-                    "prefix": "kv-for-tde",
-                    "accessPolicies": [
-                        {
-                          "tenantId": "auto-update",
-                          "objectId": "auto-update",
-                          "applicationId": "auto-update",
-                          "permissions": {
-                            "keys": [
-                              "encrypt",
-                              "decrypt",
-                              "wrapKey",
-                              "unwrapKey",
-                              "sign"
-                            ],
-                            "secrets": [
-                              "get", 
-                              "list",
-                              "set"
-                            ]
-                          }
-                        }
-                    ]
                 }
             }
         }

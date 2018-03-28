@@ -23,7 +23,6 @@
             "applicationADSecret": "[parameters('commonReference').deploymentPassword]"
         },
         "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
-        "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]",
         "diagStorageAccName": "[toLower(concat(parameters('commonReference').prefix,'diag',uniqueString(resourceGroup().name)))]",
         "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',uniqueString(resourceGroup().name))]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
@@ -348,6 +347,7 @@
             }
         },
         {
+            "condition": false,
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('webAppName'),'-appsettings')]",
             "type": "Microsoft.Resources/deployments",
@@ -392,7 +392,7 @@
                         "value": "[parameters('commonReference').location]"
                     },
                     "packageUri": {
-                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/artifacts/ContosoWebStore.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/artifacts/ContosoClinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
@@ -423,7 +423,7 @@
                         "value": "[parameters('workload').appService.connectionType]"
                     },
                     "connectionString": {
-                        "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', parameters('workload').sqlServer.databases[0].name, ';User Id=', parameters('workload').sqlServer.administratorName, ';Password=', parameters('commonReference').deploymentPassword, ';Column Encryption Setting=Enabled;Encrypt=True;TrustServerCertificate=False;Connection Timeout=300;')]"
+                        "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', parameters('workload').sqlServer.databases[0].name, ';User Id=', parameters('workload').sqlServer.administratorName, ';Password=', parameters('commonReference').deploymentPassword, ';Connection Timeout=300;')]"
                     }
                 }
             }
@@ -532,37 +532,6 @@
                     },
                     "tags": {
                         "value": "[variables('tags')]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[variables('keyVaultName')]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[variables('omsWorkspaceName')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.keyvault/vaults.json',parameters('commonReference')._artifactsLocationSasToken)]"
-                },
-                "parameters": {
-                    "keyVaultName": {
-                        "value": "[variables('keyVaultName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('commonReference').location]"
-                    },
-                    "omsWorkspaceResourceId": {
-                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
-                    },
-                    "tags": {
-                        "value": "[variables('tags')]"
-                    },
-                    "accessPolicies": {
-                        "value": "[parameters('workload').keyVault.accessPolicies]"
                     }
                 }
             }
