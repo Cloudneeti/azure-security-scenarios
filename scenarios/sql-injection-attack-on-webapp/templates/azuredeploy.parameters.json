@@ -14,6 +14,32 @@
         },
         "workload": {
             "value": {
+                "virtualNetwork": {
+                    "prefix": "vnet",
+                    "addressPrefix": "10.1.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "appgw-detection",
+                            "properties": {
+                                "addressPrefix": "10.1.0.0/24"
+                            }
+                        },
+                        {
+                            "name": "appgw-prevention",
+                            "properties": {
+                                "addressPrefix": "10.1.1.0/24"
+                            }
+                        }
+                    ]
+                },
+                "applicationGateway": {
+                    "withDetectionMode": {
+                        "prefix": "appgw-detection"
+                    },
+                    "withPreventionMode": {
+                        "prefix": "appgw-prevention"
+                    }
+                },
                 "omsWorkspace": {
                     "prefix": "oms",
                     "sku": "PerNode",
