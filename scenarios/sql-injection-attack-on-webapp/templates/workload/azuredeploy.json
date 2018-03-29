@@ -427,6 +427,7 @@
             }
         },
         {
+            "condition":false,
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('sqlServerName'),'-auditingSettings')]",
             "type": "Microsoft.Resources/deployments",
@@ -450,6 +451,7 @@
             }
         },
         {
+            "condition":false,
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('sqlServerName'),'-securityAlertPolicies')]",
             "type": "Microsoft.Resources/deployments",

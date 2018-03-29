@@ -33,11 +33,11 @@ param (
     [string]
     $artifactsStorageAccountName = $null,
 
-    [Parameter(Mandatory = $true,
+    [Parameter(Mandatory = $false,
     HelpMessage="Provide email address for recieving threat detection alerts from Azure SQL.")]
     [Alias("email")]
     [string]
-    $EmailAddressForAlerts
+    $EmailAddressForAlerts = "dummy@contoso.com"
 
 )
 
