@@ -55,7 +55,7 @@
                     "prefix": "asp"
                 },
                 "appService": {
-                    "prefix": "sql-injection-app",
+                    "prefix": "xss-app",
                     "connectionType": "SQLAzure"
                 },
                 "sqlServer": {
@@ -63,7 +63,8 @@
                     "administratorName": "sqlAdmin",
                     "databases": [
                         {
-                            "name": "clinic"
+                            "name": "contosoclinic",
+                            "edition": "Standard"
                         }
                     ],
                     "sendAlertsTo": "auto-update"

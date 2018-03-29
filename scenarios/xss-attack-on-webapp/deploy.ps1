@@ -33,7 +33,8 @@ param (
     [string]
     $artifactsStorageAccountName = $null,
 
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $false,
+    HelpMessage="Provide email address for recieving threat detection alerts from Azure SQL.")]
     [Alias("email")]
     [string]
     $EmailAddressForAlerts = "dummy@contoso.com"
@@ -88,7 +89,8 @@ Write-Verbose "Module imported."
 $resourceProviders = @(
     "Microsoft.Storage",
     "Microsoft.Network",
-    "Microsoft.Web"
+    "Microsoft.Web",
+    "Microsoft.Sql"
 )
 if($resourceProviders.length) {
     Write-Host "Registering resource providers"
@@ -182,9 +184,18 @@ Write-Verbose -Message "Importing SQL bacpac and Updating Azure SQL DB Data Mask
 
 # Importing bacpac file
 Write-Verbose -Message "Importing SQL backpac from release artifacts storage account."
-$sqlBacpacUri = "$artifactsLocation/$deploymentName/artifacts/clinic.bacpac"
-New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -StorageKeytype $artifactsStorageAccKeyType -StorageKey $artifactsStorageAccKey -StorageUri "$sqlBacpacUri" -AdministratorLogin 'sqlAdmin' -AdministratorLoginPassword $secureDeploymentPassword -Edition Standard -ServiceObjectiveName S0 -DatabaseMaxSizeBytes 50000
+$sqlBacpacUri = "$artifactsLocation/$deploymentName/artifacts/contosoclinic.bacpac"
+$importRequest = New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -DatabaseName $databaseName -StorageKeytype $artifactsStorageAccKeyType -StorageKey $artifactsStorageAccKey -StorageUri "$sqlBacpacUri" -AdministratorLogin 'sqlAdmin' -AdministratorLoginPassword $secureDeploymentPassword -Edition Standard -ServiceObjectiveName S0 -DatabaseMaxSizeBytes 50000
+$importStatus = Get-AzureRmSqlDatabaseImportExportStatus -OperationStatusLink $importRequest.OperationStatusLink
+Write-Verbose "Importing.."
+while ($importStatus.Status -eq "InProgress")
+{
+    $importStatus = Get-AzureRmSqlDatabaseImportExportStatus -OperationStatusLink $importRequest.OperationStatusLink
+    Write-Verbose "Database import is in progress... "
+    Start-Sleep -s 10
+}
+$importStatus
 
 Write-Host ""
 Write-Host ""
-Write-Host "Deployment Completed." -ForegroundColor Cyan.
+Write-Host "Deployment Completed."
