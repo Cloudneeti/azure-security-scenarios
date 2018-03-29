@@ -44,39 +44,54 @@ Attack on web app with
 
 2. Select Application Gateway with name 'appgw-detection-' as prefix.
 
-    ![Setup Subscription](images/sql-inj-appgateway-det-location.png)
+    ![](images/sql-inj-appgateway-det-location.png)
 
 3. Application Gateway WAF enabled and Firewall in Detection mode as shown below.
 
-    ![Setup Subscription](images/sql-inj-appgateway-waf-det.png)
+    ![](images/sql-inj-appgateway-waf-det.png)
 
 4. On Overview Page --> Copy Frontend public IP address as
-    ![Setup Subscription](images/sql-inj-appgateway-det-ip.png)
+    ![](images/sql-inj-appgateway-det-ip.png)
 
 5. Open Internet Explorer with above details as shown below  
-    ![Setup Subscription](images/sql-inj-webapp-contoso-landingpage.png)
+    ![](images/sql-inj-webapp-contoso-landingpage.png)
 
 4. Click on Patient link it will display list of details 
 
-    ![Setup Subscription](images/sql-inj-webapp-contoso-patients-defpage.png)
+    ![](images/sql-inj-webapp-contoso-patients-defpage.png)
 
 4. Perform SQL Injection attack by copying " **'order by SSN--** " in search box and click on "Search". Application will show sorted data based on SSN.
 
-    ![Setup Subscription](images/sql-inj-webapp-contoso-patients-attack-page.png)    
+    ![](images/sql-inj-webapp-contoso-patients-attack-page.png)    
     'order by SSN--
     
 # Detect
+###  Detection using OMS
 To detect the attack execute following query in Azure Log Analytics
 
 AzureDiagnostics | where Message  contains "Injection" and action_s contains "detected"
-    ![Setup Subscription](images/sql-inj-log-analytics-det.png) 
+    ![](images/sql-inj-log-analytics-det.png) 
     
-    
+ ###  Azure Security Center Recommendation
+ 
+1. Azure Security Center gives  recommendations to enable Auditing and Threat Detection and allows you to perform  steps from the console itself.
+
+![](images/sql-inj-asc-recom.png) 
+
+2. Home > Security Center - Overview > Data Resources > contosoclinic > Enable Auditing & Threat detection on SQL databases >Auditing & Threat Detection 
+
+![](images/sql-inj-db-td-enabled.png)
+
+3. Once database is enabled for Auditing & Threat detection, Azure Security Center generate alert mentioned in Send alert to field. 
+
+![](images/sql-inj-detection-mail.png)
+
+
 # Prevention
 
   * Update Web application firewall mode to Prevention for application gateway. This will take 5-10 mins. Hence we will connect the application using Application Gateway (WAF- Prevention mode) 
 
-    ![Setup Subscription](images/sql-inj-appgateway-waf-prev.png)    
+    ![](images/sql-inj-appgateway-waf-prev.png)    
     
   
 
@@ -84,7 +99,7 @@ AzureDiagnostics | where Message  contains "Injection" and action_s contains "de
 
 * Execute the step 7 to perform SQL Injection attack, Application Gateway will prevent access
 
-    ![Setup Subscription](images/403-forbidden-access-denied.png)  
+    ![](images/403-forbidden-access-denied.png)  
 
  
 * To detect the prevention of attack execute following query in Azure Log Analytics
@@ -92,13 +107,18 @@ AzureDiagnostics | where Message  contains "Injection" and action_s contains "de
 
     AzureDiagnostics | where Message  contains "injection" and action_s contains "blocked"
     
-    ![Setup Subscription](images/sql-inj-log-analytics-blocked.png)  
+    ![](images/sql-inj-log-analytics-blocked.png)  
 
 
-You will notice events related to Quarantined items. It might take few minutes for OMS to pull logs from virtual machine, so if you don't get any search results, please try again after sometime.
+You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
 
 References -
 
  
+ https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
+ 
+ https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
+ 
+ https://docs.microsoft.com/en-us/azure/sql-database/
 
 

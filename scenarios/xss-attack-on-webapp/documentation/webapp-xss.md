@@ -44,44 +44,44 @@ Attack on web app with
 
 2. Select Application Gateway with name 'appgw-detection-' as prefix.
 
- ![Setup Subscription](images/xss-appgateway-det-location.png)
+ ![](images/xss-appgateway-det-location.png)
 
 
 3. Application Gateway WAF enabled and Firewall in Detection mode as shown below.
 
-    ![Setup Subscription](images/xss-appgateway-waf-det.png)
+    ![](images/xss-appgateway-waf-det.png)
 
 4. On Overview Page --> Copy Frontend public IP address as
-    ![Setup Subscription](images/xss-appgateway-det-ip.png)
+    ![](images/xss-appgateway-det-ip.png)
 
 5. Open Internet Explorer with above details as shown below  
-    ![Setup Subscription](images/xss-webapp-contoso-landingpage.png)
+    ![](images/xss-webapp-contoso-landingpage.png)
 
 4. Click on Patient link and select Edit option 
 
-    ![Setup Subscription](images/xss-webapp-contoso-patients-defpage.png)
+    ![](images/xss-webapp-contoso-patients-defpage.png)
 
 4. Perform XSS attack by copying javascript code " **<script>alert('test script')</script>** " in MiddleName text box and click on "Save". 
- ![Setup Subscription](images/xss-attack-script.png) 
+ ![](images/xss-attack-script.png) 
 
 
 5. Application will save data in database and dispaly it on dashboard
 .
 
-    ![Setup Subscription](images/xss-attack-dashboard.png)    
+    ![](images/xss-attack-dashboard.png)    
     
     
 # Detect
 To detect the attack execute following query in Azure Log Analytics
 
 AzureDiagnostics | where Message  contains "xss" and action_s contains "detected"
-        ![Setup Subscription](images/xss-log-analytics-det.png) 
+        ![](images/xss-log-analytics-det.png) 
     
 # Prevention
 
   * Update Web application firewall mode to Prevention for application gateway. This will take 5-10 mins. Hence we will connect the application using Application Gateway (WAF- Prevention mode) 
 
-    ![Setup Subscription](images/xss-appgateway-waf-prev.png)    
+    ![](images/xss-appgateway-waf-prev.png)    
     
   
 
@@ -89,7 +89,7 @@ AzureDiagnostics | where Message  contains "xss" and action_s contains "detected
 
 * Execute the step 6 and 7 to perform XSS attack, Application Gateway will prevent access
 
-    ![Setup Subscription](images/403-forbidden-access-denied.png)  
+    ![](images/403-forbidden-access-denied.png)  
 
  
 * To detect the prevention of attack execute following query in Azure Log Analytics
@@ -97,13 +97,17 @@ AzureDiagnostics | where Message  contains "xss" and action_s contains "detected
 
     AzureDiagnostics | where Message  contains "xss" and action_s contains "blocked"
     
-    ![Setup Subscription](images/xss-log-analytics-blocked.png)  
+    ![](images/xss-log-analytics-blocked.png)  
 
 
-You will notice events related to Quarantined items. It might take few minutes for OMS to pull logs from virtual machine, so if you don't get any search results, please try again after sometime.
+You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
 
 References -
 
+https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
+ 
+ https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
+ 
  
 
 
