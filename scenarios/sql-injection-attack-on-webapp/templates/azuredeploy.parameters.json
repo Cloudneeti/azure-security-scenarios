@@ -48,7 +48,7 @@
                         "AzureActivity",
                         "AzureWebAppsAnalytics",
                         "AzureSQLAnalytics",
-                        "KeyVaultAnalytics"
+                        "AzureAppGatewayAnalytics"
                     ]
                 },
                 "appServicePlan": {
@@ -63,7 +63,8 @@
                     "administratorName": "sqlAdmin",
                     "databases": [
                         {
-                            "name": "clinic"
+                            "name": "contosoclinic",
+                            "edition": "Standard"
                         }
                     ],
                     "sendAlertsTo": "auto-update"

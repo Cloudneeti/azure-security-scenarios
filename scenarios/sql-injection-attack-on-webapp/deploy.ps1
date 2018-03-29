@@ -6,19 +6,19 @@ param (
     $Prefix,
 
     # Enter Subscription Id for deployment.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("subscription")]
     [guid]
     $SubscriptionId,
 
     # Enter AAD Username with Owner permission at subscription level and Global Administrator at AAD level.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("user")]
     [string]
     $UserName,
 
     # Enter AAD Username password as securestring.
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("pwd")]
     [securestring]
     $Password,
@@ -87,8 +87,6 @@ Write-Verbose "Module imported."
 # Register RPs
 $resourceProviders = @(
     "Microsoft.Storage",
-    "Microsoft.Compute",
-    "Microsoft.KeyVault",
     "Microsoft.Network",
     "Microsoft.Web"
 )
@@ -189,4 +187,4 @@ New-AzureRmSqlDatabaseImport -ResourceGroupName $workloadResourceGroupName -Serv
 
 Write-Host ""
 Write-Host ""
-Write-Host "Deployment Completed." -ForegroundColor Cyan.
+Write-Host "Deployment Completed."
