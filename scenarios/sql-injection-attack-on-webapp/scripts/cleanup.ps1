@@ -33,7 +33,7 @@ param (
 $ErrorActionPreference = 'Stop'
 Write-Verbose "Setting up deployment variables."
 $deploymentName = "sql-injection-attack-on-webapp"
-$workloadResourceGroupName = "{0}-{1}-{2}" -f $Prefix, $deploymentName, 'workload'
+$workloadResourceGroupName = "{0}-{1}" -f $Prefix, $deploymentName
 
 try {
     Write-Verbose "Deleting ResourceGroups"
