@@ -11,6 +11,7 @@
         },
         "sendAlertsTo": {
             "type": "string",
+            "defaultValue": "dummy@contoso.com",
             "metadata": {
                 "description": "Specifies the semicolon-separated list of e-mail addresses to which the alert is sent."
             }

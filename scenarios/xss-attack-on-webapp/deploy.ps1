@@ -33,10 +33,10 @@ param (
     [string]
     $artifactsStorageAccountName = $null,
 
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [Alias("email")]
     [string]
-    $EmailAddressForAlerts
+    $EmailAddressForAlerts = "dummy@contoso.com"
 
 )
 
