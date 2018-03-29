@@ -89,7 +89,8 @@ Write-Verbose "Module imported."
 $resourceProviders = @(
     "Microsoft.Storage",
     "Microsoft.Network",
-    "Microsoft.Web"
+    "Microsoft.Web",
+    "Microsoft.Sql"
 )
 if($resourceProviders.length) {
     Write-Host "Registering resource providers"
