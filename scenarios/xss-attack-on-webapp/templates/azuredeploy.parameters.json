@@ -1,0 +1,74 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "value": {
+                "deploymentName": "xss-attack-on-webapp",
+                "_artifactsLocation": "auto-update",
+                "_artifactsLocationSasToken": "auto-update",
+                "location": "East US",
+                "deploymentPassword": "GY45s@67hx!K",
+                "prefix": "000"
+            }
+        },
+        "workload": {
+            "value": {
+                "virtualNetwork": {
+                    "prefix": "vnet",
+                    "addressPrefix": "10.1.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "appgw-detection",
+                            "properties": {
+                                "addressPrefix": "10.1.0.0/24"
+                            }
+                        },
+                        {
+                            "name": "appgw-prevention",
+                            "properties": {
+                                "addressPrefix": "10.1.1.0/24"
+                            }
+                        }
+                    ]
+                },
+                "applicationGateway": {
+                    "withDetectionMode": {
+                        "prefix": "appgw-detection"
+                    },
+                    "withPreventionMode": {
+                        "prefix": "appgw-prevention"
+                    }
+                },
+                "omsWorkspace": {
+                    "prefix": "oms",
+                    "sku": "PerNode",
+                    "solutions": [
+                        "Security",
+                        "AzureActivity",
+                        "AzureWebAppsAnalytics",
+                        "AzureSQLAnalytics",
+                        "AzureAppGatewayAnalytics"
+                    ]
+                },
+                "appServicePlan": {
+                    "prefix": "asp"
+                },
+                "appService": {
+                    "prefix": "sql-injection-app",
+                    "connectionType": "SQLAzure"
+                },
+                "sqlServer": {
+                    "prefix": "sql-without-td",
+                    "administratorName": "sqlAdmin",
+                    "databases": [
+                        {
+                            "name": "clinic"
+                        }
+                    ],
+                    "sendAlertsTo": "auto-update"
+                }
+            }
+        }
+    }
+}
