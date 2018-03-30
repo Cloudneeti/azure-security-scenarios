@@ -50,7 +50,7 @@ $artifactStagingDirectories = @(
     #"$rootFolder\common"
     #"$rootFolder\resources"
 )
-$workloadResourceGroupName = "{0}-{1}-{2}" -f $Prefix, $deploymentName, 'workload'
+$workloadResourceGroupName = "{0}-{1}" -f $Prefix, $deploymentName
 $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pass common parameters to the template.
 $artifactsLocation = '_artifactsLocation'
 $artifactsLocationSasToken = '_artifactsLocationSasToken'
