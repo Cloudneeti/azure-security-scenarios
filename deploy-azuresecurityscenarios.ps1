@@ -84,12 +84,27 @@ param (
     [switch]
     $Help,
 
-    # use this switch for help information.
+    # use this switch for help cleanup deployed resources.
     [Parameter(Mandatory = $false,
         ParameterSetName = "Cleanup"
     )]
     [switch]
-    $Cleanup
+    $Cleanup,
+
+    # use this switch for help cleanup deployed resources.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "EnableASC"
+    )]
+    [switch]
+    $EnableSecurityCenter,
+
+    # provide email address for alerts from security center.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "EnableASC",
+        HelpMessage="Provide email address for recieving alerts from Azure Security Center.")]
+    [Alias("email")]
+    [string]
+    $EmailAddressForAlerts = "dummy@contoso.com"
 
 )
 
@@ -131,7 +146,13 @@ else {
 
 if ($Cleanup) {
     Write-Verbose "Intiating Cleanup for $Scenario"
-    & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -Prefix $prefix -Verbose
+    & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -EmailAddressForAlerts $prefix -Verbose
+    Break
+}
+
+if ($EnableSecurityCenter) {
+    Write-Verbose "Enabling Azure Security Center and Policies."
+    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -Prefix $EmailAddressForAlerts -Verbose
     Break
 }
 
