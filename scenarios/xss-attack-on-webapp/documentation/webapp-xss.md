@@ -73,9 +73,18 @@ Attack on web app with
     
 # Detect
 To detect the attack execute following query in Azure Log Analytics
+1. Go to Azure Portal --> navigate to resource group -xss-attack-on-webapp  
+![](images/xss-oms-location.png) 
 
-AzureDiagnostics | where Message  contains "xss" and action_s contains "detected"
-        ![](images/xss-log-analytics-det.png) 
+2. Go to Log analytics --> Click on Log Search --> Type query search 
+
+    ```AzureDiagnostics | where Message  contains "xss" and action_s contains "detected"```
+
+    ![](images/xss-oms-log-ana-location.png) 
+    
+3. Following details gets logged 
+
+    ![](images/xss-log-analytics-det.png) 
     
 # Prevention
 
