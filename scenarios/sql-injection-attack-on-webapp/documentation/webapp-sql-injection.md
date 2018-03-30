@@ -1,5 +1,25 @@
 ﻿# Objective of the POC
-Showcase a SQL injection attack and mitigation on a Web Application (Web App + SQL DB)
+Showcase a SQL injection attack detection & prevention on a Web Application (Web App + SQL DB)
+
+# Overview
+It showcases following scenarios
+1. Perform SQL injection attack on Web App with following configuration --> Application detects attack using application gateway
+    i. Application Gateway (WAF enabled-Detection mode)
+    ii. SQL DB with Threat Detection disabled
+
+2. Perform SQL injection attack on Web App with following configuration --> Application detects attack using application gateway and SQL database alert
+    i. Application Gateway (WAF enabled-Detection mode)
+    ii. SQL DB with Threat Detection enabled and Send Alert To selected
+
+3. Perform SQL injection attack on Web App with following configuration --> Application prevents attack
+    i. Application Gateway (WAF enabled-Prevention mode)
+    ii. SQL DB with Threat Detection enabled and Send Alert To selected
+
+
+
+
+# Important Notes
+It takes few hours for OMS to pull logs for detection and prevention events
 
 # Prerequisites
 Access to Azure subscription to deploy following resources 
@@ -35,7 +55,7 @@ Access to Azure subscription to deploy following resources
 
     `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario "sql-injection-attack-on-webapp" -Command Deploy   -Verbose`
 
-# Attack
+# Attack -1
 Attack on web app with
 * Application gateway - WAF - Detection mode 
 * SQL server and database with Threat Detection disabled. 
@@ -50,26 +70,35 @@ Attack on web app with
 
     ![](images/sql-inj-appgateway-waf-det.png)
 
-4. On Overview Page --> Copy Frontend public IP address as
+4. On Overview Page --> Copy Frontend public IP address (DNS label) as
     ![](images/sql-inj-appgateway-det-ip.png)
 
 5. Open Internet Explorer with above details as shown below  
     ![](images/sql-inj-webapp-contoso-landingpage.png)
 
-4. Click on Patient link it will display list of details 
+6. Click on Patient link it will display list of details 
 
     ![](images/sql-inj-webapp-contoso-patients-defpage.png)
 
-4. Perform SQL Injection attack by copying " **'order by SSN--** " in search box and click on "Search". Application will show sorted data based on SSN.
+7. Perform SQL Injection attack by copying " **'order by SSN--** " in search box and click on "Search". Application will show sorted data based on SSN.
 
     ![](images/sql-inj-webapp-contoso-patients-attack-page.png)    
-    'order by SSN--
+    
     
 # Detect
 ###  Detection using OMS
 To detect the attack execute following query in Azure Log Analytics
+1. Go to Azure Portal --> navigate to resource group -sql-injection-attack-on-webapp  
+![](images/sql-inj-oms-location.png) 
 
-AzureDiagnostics | where Message  contains "Injection" and action_s contains "detected"
+2. Go to Log analytics --> Click on Log Search --> Type query search 
+
+    AzureDiagnostics | where Message  contains "Injection" and action_s contains "detected"
+
+    ![](images/sql-inj-oms-log-ana-location.png) 
+    
+3. Following details gets logged 
+
     ![](images/sql-inj-log-analytics-det.png) 
     
  ###  Azure Security Center Recommendation
@@ -78,7 +107,7 @@ AzureDiagnostics | where Message  contains "Injection" and action_s contains "de
 
 ![](images/sql-inj-asc-recom.png) 
 
-2. Home > Security Center - Overview > Data Resources > contosoclinic > Enable Auditing & Threat detection on SQL databases >Auditing & Threat Detection 
+2. Azure Portal > Security Center - Overview > Data Resources > contosoclinic > Enable Auditing & Threat detection on SQL databases >Auditing & Threat Detection 
 
 ![](images/sql-inj-db-td-enabled.png)
 
@@ -95,7 +124,7 @@ AzureDiagnostics | where Message  contains "Injection" and action_s contains "de
     
   
 
-## Detection after Prevention
+## Attack - 3 
 
 * Execute the step 7 to perform SQL Injection attack, Application Gateway will prevent access
 
