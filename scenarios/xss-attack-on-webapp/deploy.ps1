@@ -121,8 +121,8 @@ $storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountNa
 # Create the storage account if it doesn't already exist
 if ($storageAccount -eq $null) {
     $artifactStagingDirectories = @(
-        "$rootFolder\common"
-        "$rootFolder\resources"
+        #"$rootFolder\common"
+        #"$rootFolder\resources"
         "$PSScriptRoot"
     )
     Write-Verbose "Artifacts storage account does not exists."
