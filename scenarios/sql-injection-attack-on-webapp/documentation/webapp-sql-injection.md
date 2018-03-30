@@ -55,7 +55,7 @@ Access to Azure subscription to deploy following resources
 
     `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario "sql-injection-attack-on-webapp" -Command Deploy   -Verbose`
 
-# Attack -1
+# Attack - 1
 Attack on web app with
 * Application gateway - WAF - Detection mode 
 * SQL server and database with Threat Detection disabled. 
@@ -93,7 +93,7 @@ To detect the attack execute following query in Azure Log Analytics
 
 2. Go to Log analytics --> Click on Log Search --> Type query search 
 
-    AzureDiagnostics | where Message  contains "Injection" and action_s contains "detected"
+    ```AzureDiagnostics | where Message  contains "Injection" and action_s contains "detected"```
 
     ![](images/sql-inj-oms-log-ana-location.png) 
     
@@ -111,7 +111,9 @@ To detect the attack execute following query in Azure Log Analytics
 
 ![](images/sql-inj-db-td-enabled.png)
 
-3. Once database is enabled for Auditing & Threat detection, Azure Security Center generate alert mentioned in Send alert to field. 
+## Attack - 2
+
+Once Auditing & Threat Detection is database is enabled for SQL database, Azure Security Center sends email alert mentioned in Send alert to field. Execute the step 7 to perform SQL Injection attack
 
 ![](images/sql-inj-detection-mail.png)
 
@@ -124,7 +126,7 @@ To detect the attack execute following query in Azure Log Analytics
     
   
 
-## Attack - 3 
+## Prevention Detection (Attack - 3)
 
 * Execute the step 7 to perform SQL Injection attack, Application Gateway will prevent access
 
@@ -134,20 +136,32 @@ To detect the attack execute following query in Azure Log Analytics
 * To detect the prevention of attack execute following query in Azure Log Analytics
 
 
-    AzureDiagnostics | where Message  contains "injection" and action_s contains "blocked"
+    ```AzureDiagnostics | where Message  contains "injection" and action_s contains "blocked"```
     
     ![](images/sql-inj-log-analytics-blocked.png)  
 
 
-You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
+    You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
+    
+## Clear Deployment 
 
-References -
+Run following command to clear all the resources deployed during the demo.
 
- 
- https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
- 
- https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
- 
- https://docs.microsoft.com/en-us/azure/sql-database/
+```
+.\deploy-azuresecurityscenarios.ps1 -Scenario sql-injection-attack-on-webapp -Cleanup 
+```
 
+Verification steps -
+1. Login to Azure Portal / Subscription
+2. Check if all the ResourceGroup with deploymentSuffix is cleared.
+
+
+
+
+**References** 
+
+https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
+ 
+https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
+ 
 

@@ -102,12 +102,26 @@ AzureDiagnostics | where Message  contains "xss" and action_s contains "detected
 
 You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
 
-References -
+
+## Clear Deployment 
+
+Run following command to clear all the resources deployed during the demo.
+
+```
+.\deploy-azuresecurityscenarios.ps1 -Scenario xss-attack-on-webapp -Cleanup 
+```
+
+Verification steps -
+1. Login to Azure Portal / Subscription
+2. Check if all the ResourceGroup with deploymentSuffix is cleared.
+
+
+
+
+**References** 
 
 https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
  
- https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
+https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
  
- 
-
-
+https://docs.microsoft.com/en-us/azure/sql-database/
