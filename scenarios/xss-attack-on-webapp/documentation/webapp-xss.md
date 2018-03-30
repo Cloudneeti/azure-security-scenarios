@@ -123,5 +123,4 @@ Verification steps -
 https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-introduction
  
 https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-web-application-firewall-overview
- 
-https://docs.microsoft.com/en-us/azure/sql-database/
+
