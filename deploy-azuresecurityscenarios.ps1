@@ -138,11 +138,10 @@ if ((Get-AzureRmContext).Subscription -eq $null) {
 }
 else {
     $subscriptionId = (Get-AzureRmContext).Subscription.Id
-    $artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
-    $deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
-    $storageAccountName = 'stage' + $deploymentHash
 }
-
+$artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
+$deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
+$storageAccountName = 'stage' + $deploymentHash
 if ($EnableSecurityCenter) {
     Write-Verbose "Enabling Azure Security Center and Policies."
     & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
