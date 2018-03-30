@@ -123,7 +123,7 @@ if ($storageAccount -eq $null) {
     $artifactStagingDirectories = @(
         #"$rootFolder\common"
         #"$rootFolder\resources"
-        "$PSScriptRoot\artifacts"
+        "$PSScriptRoot"
     )
     Write-Verbose "Artifacts storage account does not exists."
     Write-Verbose "Provisioning artifacts storage account."
@@ -178,7 +178,7 @@ New-AzureRmSqlServerFirewallRule -ResourceGroupName $workloadResourceGroupName -
 New-AzureRmSqlServerFirewallRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -FirewallRuleName "AllowAzureServices" -StartIpAddress 0.0.0.0 -EndIpAddress 0.0.0.0 -ErrorAction SilentlyContinue
 
 Start-Sleep -Seconds 15
-
+Break
 # Import SQL bacpac and update azure SQL DB Data masking policy
 Write-Verbose -Message "Importing SQL bacpac and Updating Azure SQL DB Data Masking Policy"
 

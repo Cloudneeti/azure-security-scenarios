@@ -123,7 +123,7 @@ if ($storageAccount -eq $null) {
     $artifactStagingDirectories = @(
         #"$rootFolder\common"
         #"$rootFolder\resources"
-        "$PSScriptRoot\artifacts"
+        "$PSScriptRoot"
     )
     Write-Verbose "Artifacts storage account does not exists."
     Write-Verbose "Provisioning artifacts storage account."
@@ -135,7 +135,7 @@ if ($storageAccount -eq $null) {
 }
 else {
     $artifactStagingDirectories = @(
-        #"$PSScriptRoot"
+        "$PSScriptRoot"
     )
     New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue
 }
