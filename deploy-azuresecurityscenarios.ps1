@@ -110,7 +110,6 @@ param (
 
 $ErrorActionPreference = 'Stop'
 $scenarios = Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json
-$prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Help) {
     $scenarios.PSObject.Properties | Select-Object -Property Name , @{Name = "Description"; Expression = {$_.value.description}} | Format-Table
     Break
@@ -144,15 +143,16 @@ else {
     $storageAccountName = 'stage' + $deploymentHash
 }
 
-if ($Cleanup) {
-    Write-Verbose "Intiating Cleanup for $Scenario"
-    & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -EmailAddressForAlerts $prefix -Verbose
+if ($EnableSecurityCenter) {
+    Write-Verbose "Enabling Azure Security Center and Policies."
+    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
     Break
 }
 
-if ($EnableSecurityCenter) {
-    Write-Verbose "Enabling Azure Security Center and Policies."
-    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -Prefix $EmailAddressForAlerts -Verbose
+$prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
+if ($Cleanup) {
+    Write-Verbose "Intiating Cleanup for $Scenario"
+    & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -Prefix $prefix -Verbose
     Break
 }
 
