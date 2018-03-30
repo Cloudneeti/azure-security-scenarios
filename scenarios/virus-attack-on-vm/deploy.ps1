@@ -49,7 +49,6 @@ $moduleFolderPath = "$rootFolder\common\modules\powershell\asc.poc.psd1"
 $artifactStagingDirectories = @(
     #"$rootFolder\common"
     #"$rootFolder\resources"
-    "$PSScriptRoot"
 )
 $workloadResourceGroupName = "{0}-{1}-{2}" -f $Prefix, $deploymentName, 'workload'
 $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pass common parameters to the template.
