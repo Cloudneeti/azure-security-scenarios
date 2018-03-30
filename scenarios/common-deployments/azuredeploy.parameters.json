@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "value": {
+                "deploymentName": "common-resources",
+                "_artifactsLocation": "auto-update",
+                "_artifactsLocationSasToken": "auto-update",
+                "location": "East US",
+                "prefix": "000"
+            }
+        },
+        "monitoring": {
+            "value": {
+                "omsWorkspace": {
+                    "prefix": "oms",
+                    "sku": "PerNode",
+                    "solutions": [
+                        "Security",
+                        "AzureActivity",
+                        "AzureWebAppsAnalytics",
+                        "AzureSQLAnalytics",
+                        "AzureAppGatewayAnalytics",
+                        "AntiMalware"
+                    ]
+                }
+            }
+        }
+    }
+}
