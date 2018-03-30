@@ -4,16 +4,18 @@ Showcase a SQL injection attack detection & prevention on a Web Application (Web
 # Overview
 It showcases following scenarios
 1. Perform SQL injection attack on Web App with following configuration --> Application detects attack using application gateway
-    i. Application Gateway (WAF enabled-Detection mode)
-    ii. SQL DB with Threat Detection disabled
+    * Application Gateway (WAF enabled-Detection mode)
+    * SQL DB with Threat Detection disabled
 
 2. Perform SQL injection attack on Web App with following configuration --> Application detects attack using application gateway and SQL database alert
-    i. Application Gateway (WAF enabled-Detection mode)
-    ii. SQL DB with Threat Detection enabled and Send Alert To selected
+    * Application Gateway (WAF enabled-Detection mode)
+    * SQL DB with Threat Detection enabled and Send
+ Alert To selected
 
 3. Perform SQL injection attack on Web App with following configuration --> Application prevents attack
-    i. Application Gateway (WAF enabled-Prevention mode)
-    ii. SQL DB with Threat Detection enabled and Send Alert To selected
+    * Application Gateway (WAF enabled-Prevention mode)
+    * SQL DB with Threat Detection enabled and Send Alert To selected
+
 
 
 
