@@ -4,11 +4,11 @@ Showcase a Cross Site Scripting (XSS) attack and mitigation on a Web Application
 # Overview
 It showcases following scenarios
 1. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application detects attack using application gateway
-    i. Application Gateway (WAF enabled-Detection mode)
+    * Application Gateway (WAF enabled-Detection mode)
   
 
 2. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application prevents attack using application gateway
-    i. Application Gateway (WAF enabled-Prevention mode)
+    * Application Gateway (WAF enabled-Prevention mode)
   
 
 # Important Notes
