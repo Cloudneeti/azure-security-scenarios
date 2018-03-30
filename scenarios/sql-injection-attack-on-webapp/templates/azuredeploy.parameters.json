@@ -14,6 +14,32 @@
         },
         "workload": {
             "value": {
+                "virtualNetwork": {
+                    "prefix": "vnet",
+                    "addressPrefix": "10.1.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "appgw-detection",
+                            "properties": {
+                                "addressPrefix": "10.1.0.0/24"
+                            }
+                        },
+                        {
+                            "name": "appgw-prevention",
+                            "properties": {
+                                "addressPrefix": "10.1.1.0/24"
+                            }
+                        }
+                    ]
+                },
+                "applicationGateway": {
+                    "withDetectionMode": {
+                        "prefix": "appgw-detection"
+                    },
+                    "withPreventionMode": {
+                        "prefix": "appgw-prevention"
+                    }
+                },
                 "omsWorkspace": {
                     "prefix": "oms",
                     "sku": "PerNode",
@@ -22,47 +48,26 @@
                         "AzureActivity",
                         "AzureWebAppsAnalytics",
                         "AzureSQLAnalytics",
-                        "KeyVaultAnalytics"
+                        "AzureAppGatewayAnalytics"
                     ]
                 },
                 "appServicePlan": {
                     "prefix": "asp"
                 },
                 "appService": {
-                    "prefix": "sql-injection-app"
+                    "prefix": "sql-injection-app",
+                    "connectionType": "SQLAzure"
                 },
                 "sqlServer": {
                     "prefix": "sql-without-td",
                     "administratorName": "sqlAdmin",
                     "databases": [
                         {
-                            "name": "ContosoPayments"
+                            "name": "contosoclinic",
+                            "edition": "Standard"
                         }
-                    ]
-                },
-                "keyVault": {
-                    "prefix": "kv-for-tde",
-                    "accessPolicies": [
-                        {
-                          "tenantId": "auto-update",
-                          "objectId": "auto-update",
-                          "applicationId": "auto-update",
-                          "permissions": {
-                            "keys": [
-                              "encrypt",
-                              "decrypt",
-                              "wrapKey",
-                              "unwrapKey",
-                              "sign"
-                            ],
-                            "secrets": [
-                              "get", 
-                              "list",
-                              "set"
-                            ]
-                          }
-                        }
-                      ]
+                    ],
+                    "sendAlertsTo": "auto-update"
                 }
             }
         }

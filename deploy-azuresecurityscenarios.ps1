@@ -84,18 +84,32 @@ param (
     [switch]
     $Help,
 
-    # use this switch for help information.
+    # use this switch for help cleanup deployed resources.
     [Parameter(Mandatory = $false,
         ParameterSetName = "Cleanup"
     )]
     [switch]
-    $Cleanup
+    $Cleanup,
+
+    # use this switch for help cleanup deployed resources.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "EnableASC"
+    )]
+    [switch]
+    $EnableSecurityCenter,
+
+    # provide email address for alerts from security center.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "EnableASC",
+        HelpMessage="Provide email address for recieving alerts from Azure Security Center.")]
+    [Alias("email")]
+    [string]
+    $EmailAddressForAlerts = "dummy@contoso.com"
 
 )
 
 $ErrorActionPreference = 'Stop'
 $scenarios = Get-Content -Path $PSScriptRoot\azure-security-poc.json | ConvertFrom-Json
-$prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Help) {
     $scenarios.PSObject.Properties | Select-Object -Property Name , @{Name = "Description"; Expression = {$_.value.description}} | Format-Table
     Break
@@ -124,11 +138,17 @@ if ((Get-AzureRmContext).Subscription -eq $null) {
 }
 else {
     $subscriptionId = (Get-AzureRmContext).Subscription.Id
-    $artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
-    $deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
-    $storageAccountName = 'stage' + $deploymentHash
+}
+$artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
+$deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
+$storageAccountName = 'stage' + $deploymentHash
+if ($EnableSecurityCenter) {
+    Write-Verbose "Enabling Azure Security Center and Policies."
+    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
+    Break
 }
 
+$prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Cleanup) {
     Write-Verbose "Intiating Cleanup for $Scenario"
     & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -Prefix $prefix -Verbose

@@ -10,21 +10,261 @@
         }
     },
     "variables": {
-        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',uniqueString(resourceGroup().name))]",
+        "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
+        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',variables('deploymentUniqueString'))]",
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
             "prefix": "[parameters('commonReference').prefix]"
         },
-        "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',uniqueString(resourceGroup().name))]",
-        "webAppName": "[concat(parameters('workload').appService.prefix,'-',uniqueString(resourceGroup().name))]",
-        "webAppSettings": {
-            "administrator": "shab",
-            "password": "P@ssw0rd"
-        },
-        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',uniqueString(resourceGroup().name))]",
-        "keyVaultName": "[concat(parameters('workload').keyVault.prefix,'-',uniqueString(resourceGroup().name))]"
+        "aspName": "[concat(parameters('workload').appServicePlan.prefix,'-',variables('deploymentUniqueString'))]",
+        "webAppName": "[concat(parameters('workload').appService.prefix,'-',variables('deploymentUniqueString'))]",
+        "webAppUrl": "[concat(variables('webAppName'),'.azurewebsites.net')]",
+        "sqlServerName": "[concat(parameters('workload').sqlServer.prefix,'-',variables('deploymentUniqueString'))]",
+        "diagStorageAccName": "[toLower(concat(parameters('commonReference').prefix,'diag',variables('deploymentUniqueString')))]",
+        "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',variables('deploymentUniqueString'))]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+        "subnetRef": "[concat(variables('vnetId'),'/subnets/',parameters('workload').virtualNetwork.subnets[0].name)]",
+        "applicationGateway": [
+            {
+                "name": "[concat(parameters('workload').applicationGateway.withDetectionMode.prefix,'-',variables('deploymentUniqueString'))]",
+                "id": "[resourceId('Microsoft.Network/applicationGateways',concat(parameters('workload').applicationGateway.withDetectionMode.prefix,'-',variables('deploymentUniqueString')))]",
+                "subnetRef": "[concat(variables('vnetId'),'/subnets/',parameters('workload').virtualNetwork.subnets[0].name)]",
+                "wafMode": "Detection"
+            },
+            {
+                "name": "[concat(parameters('workload').applicationGateway.withPreventionMode.prefix,'-',variables('deploymentUniqueString'))]",
+                "id": "[resourceId('Microsoft.Network/applicationGateways',concat(parameters('workload').applicationGateway.withPreventionMode.prefix,'-',variables('deploymentUniqueString')))]",
+                "subnetRef": "[concat(variables('vnetId'),'/subnets/',parameters('workload').virtualNetwork.subnets[1].name)]",
+                "wafMode": "Prevention"
+            }
+        ],
+        "probeAseHttp": "aseProbeHTTP",
+        "probeAseHttps": "aseProbeHTTPS"
     },
     "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/virtualnetworks.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "vnetName": {
+                        "value": "[variables('vnetName')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('workload').virtualNetwork.addressPrefix]"
+                    },
+                    "subnets": {
+                        "value": "[parameters('workload').virtualNetwork.subnets]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('deploy-applicationgateway-pip',copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "copy": {
+                "name": "copy-appgateway-pip",
+                "count": 2
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/publicipaddress.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "publicIPAddressName": {
+                        "value": "[concat(variables('applicationGateway')[copyIndex()].name,'-pip')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('deploy-applicationgateway-',copyIndex())]",
+            "type": "Microsoft.Resources/deployments",
+            "copy": {
+                "name": "copy-appgateway",
+                "count": 2
+            },
+            "dependsOn": [
+                "copy-appgateway-pip",
+                "[variables('vnetName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/applicationgateways.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "applicationGatewayName": {
+                        "value": "[variables('applicationGateway')[copyIndex()].name]"
+                    },
+                    "publicIPRef": {
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('applicationGateway')[copyIndex()].name,'-pip'))]"
+                    },
+                    "frontendPorts": {
+                        "value": [
+                            {
+                                "name": "appGatewayFrontendPort",
+                                "properties": {
+                                    "Port": 80
+                                }
+                            }
+                        ]
+                    },
+                    "gatewayIPConfigurations": {
+                        "value": [
+                            {
+                                "name": "appGatewayIpConfig",
+                                "properties": {
+                                    "subnet": {
+                                        "id": "[variables('subnetRef')]"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "backendAddressPools": {
+                        "value": [
+                            {
+                                "name": "appGatewayBackendPool",
+                                "properties": {
+                                    "BackendAddresses": [
+                                        {
+                                            "fqdn": "[variables('webAppUrl')]"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "backendHttpSettingsCollection": {
+                        "value": [
+                            {
+                                "name": "appGatewayBackendHttpSettings",
+                                "properties": {
+                                    "Port": 80,
+                                    "Protocol": "Http",
+                                    "CookieBasedAffinity": "Disabled",
+                                    "pickHostNameFromBackendAddress": "true",
+                                    "Probe": {
+                                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name),'/probes/',variables('probeAseHttp'))]"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "httpListeners": {
+                        "value": [
+                            {
+                                "name": "appGatewayHttpListener",
+                                "properties": {
+                                    "FrontendIPConfiguration": {
+                                        "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name), '/frontendIPConfigurations/appGatewayFrontendIP')]"
+                                    },
+                                    "FrontendPort": {
+                                        "Id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name), '/frontendPorts/appGatewayFrontendPort')]"
+                                    },
+                                    "Protocol": "Http",
+                                    "SslCertificate": null
+                                }
+                            }
+                        ]
+                    },
+                    "requestRoutingRules": {
+                        "value": [
+                            {
+                                "Name": "rule1",
+                                "properties": {
+                                    "RuleType": "Basic",
+                                    "httpListener": {
+                                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name), '/httpListeners/appGatewayHttpListener')]"
+                                    },
+                                    "backendAddressPool": {
+                                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name), '/backendAddressPools/appGatewayBackendPool')]"
+                                    },
+                                    "backendHttpSettings": {
+                                        "id": "[concat(resourceId('Microsoft.Network/applicationGateways',variables('applicationGateway')[copyIndex()].name), '/backendHttpSettingsCollection/appGatewayBackendHttpSettings')]"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "probes": {
+                        "value": [
+                            {
+                                "name": "[variables('probeAseHttp')]",
+                                "properties": {
+                                    "protocol": "Http",
+                                    "host": "[variables('webAppUrl')]",
+                                    "path": "/",
+                                    "interval": 30,
+                                    "timeout": 30,
+                                    "unhealthyThreshold": 8
+                                }
+                            },
+                            {
+                                "name": "[variables('probeAseHttps')]",
+                                "properties": {
+                                    "protocol": "Https",
+                                    "host": "[variables('webAppUrl')]",
+                                    "path": "/",
+                                    "interval": 30,
+                                    "timeout": 30,
+                                    "unhealthyThreshold": 8
+                                }
+                            }
+                        ]
+                    },
+                    "wafMode": {
+                        "value": "[variables('applicationGateway')[copyIndex()].wafMode]"
+                    },
+                    "omsWorkspaceResourceId": {
+                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces',variables('omsWorkspaceName'))]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('diagStorageAccName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.storage/storageaccounts.storage.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
         {
             "apiVersion": "2017-05-10",
             "name": "[variables('omsWorkspaceName')]",
@@ -105,35 +345,10 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('webAppName'),'-appsettings')]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[variables('webAppName')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.config.appsettings.json',parameters('commonReference')._artifactsLocationSasToken)]"
-                },
-                "parameters": {
-                    "webAppName": {
-                        "value": "[variables('webAppName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('commonReference').location]"
-                    },
-                    "appSettings": {
-                        "value": "[variables('webAppSettings')]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2017-05-10",
             "name": "[concat(variables('webAppName'),'-msdeploy')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "[concat(variables('webAppName'),'-appsettings')]"
+                "[concat(variables('webAppName'),'-connectionStrings')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -148,10 +363,38 @@
                         "value": "[parameters('commonReference').location]"
                     },
                     "packageUri": {
-                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/artifacts/ContosoWebStore.zip',parameters('commonReference')._artifactsLocationSasToken)]"
+                        "value": "[concat(parameters('commonReference')._artifactsLocation,'/',parameters('commonReference').deploymentName,'/artifacts/ContosoClinic.zip',parameters('commonReference')._artifactsLocationSasToken)]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('webAppName'),'-connectionStrings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('webAppName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.web/sites.config.connectionstrings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "connectionType": {
+                        "value": "[parameters('workload').appService.connectionType]"
+                    },
+                    "connectionString": {
+                        "value": "[concat('Data Source=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', parameters('workload').sqlServer.databases[0].name, ';User Id=', parameters('workload').sqlServer.administratorName, ';Password=', parameters('commonReference').deploymentPassword, ';Connection Timeout=300;')]"
                     }
                 }
             }
@@ -172,14 +415,64 @@
                     "location": {
                         "value": "[parameters('commonReference').location]"
                     },
-                    "administratorLogin":{
+                    "administratorLogin": {
                         "value": "[parameters('workload').sqlServer.administratorName]"
                     },
-                    "administratorLoginPassword":{
+                    "administratorLoginPassword": {
                         "value": "[parameters('commonReference').deploymentPassword]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition":false,
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('sqlServerName'),'-auditingSettings')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[variables('sqlServerName')]",
+                "[variables('diagStorageAccName')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.auditingsettings.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    }
+                }
+            }
+        },
+        {
+            "condition":false,
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('sqlServerName'),'-securityAlertPolicies')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat(variables('sqlServerName'),'-auditingSettings')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.sql/servers.securityalertpolicies.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "sqlServerName": {
+                        "value": "[variables('sqlServerName')]"
+                    },
+                    "storageAccountName": {
+                        "value": "[variables('diagStorageAccName')]"
+                    },
+                    "sendAlertsTo": {
+                        "value": "[parameters('workload').sqlServer.sendAlertsTo]"
                     }
                 }
             }
@@ -204,49 +497,21 @@
                     "location": {
                         "value": "[parameters('commonReference').location]"
                     },
-                    "databaseName":{
+                    "databaseName": {
                         "value": "[parameters('workload').sqlServer.databases[0].name]"
                     },
-                    "omsWorkspaceResourceId":{
-                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
-                    },
-                    "tags": {
-                        "value": "[variables('tags')]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[variables('keyVaultName')]",
-            "type": "Microsoft.Resources/deployments",
-            "dependsOn": [
-                "[variables('omsWorkspaceName')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.keyvault/vaults.json',parameters('commonReference')._artifactsLocationSasToken)]"
-                },
-                "parameters": {
-                    "keyVaultName": {
-                        "value": "[variables('keyVaultName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('commonReference').location]"
-                    },
-                    "omsWorkspaceResourceId":{
+                    "omsWorkspaceResourceId": {
                         "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"
                     },
-                    "accessPolicies": {
-                        "value": "[parameters('workload').keyVault.accessPolicies]"
+                    "edition": {
+                        "value": "[parameters('workload').sqlServer.databases[0].edition]"
                     }
                 }
             }
-        }        
+        }
     ],
     "outputs": {}
 }
