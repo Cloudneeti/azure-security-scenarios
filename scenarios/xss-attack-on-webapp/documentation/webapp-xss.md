@@ -1,6 +1,20 @@
 ﻿# Objective of the POC
 Showcase a Cross Site Scripting (XSS) attack and mitigation on a Web Application 
 
+# Overview
+It showcases following scenarios
+1. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application detects attack using application gateway
+    i. Application Gateway (WAF enabled-Detection mode)
+  
+
+2. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application prevents attack using application gateway
+    i. Application Gateway (WAF enabled-Prevention mode)
+  
+
+# Important Notes
+It takes few hours for OMS to pull logs for detection and prevention events
+
+
 # Prerequisites
 Access to Azure subscription to deploy following resources 
 1. Application gateway (WAF enabled)
@@ -44,7 +58,7 @@ Attack on web app with
 
 2. Select Application Gateway with name 'appgw-detection-' as prefix.
 
- ![](images/xss-appgateway-det-location.png)
+    ![](images/xss-appgateway-det-location.png)
 
 
 3. Application Gateway WAF enabled and Firewall in Detection mode as shown below.
@@ -96,7 +110,7 @@ To detect the attack execute following query in Azure Log Analytics
 
 ## Detection after Prevention
 
-* Execute the step 6 and 7 to perform XSS attack, Application Gateway will prevent access
+* Execute the step 6 and 7 (Attack) to perform XSS attack, Application Gateway will prevent access
 
     ![](images/403-forbidden-access-denied.png)  
 
