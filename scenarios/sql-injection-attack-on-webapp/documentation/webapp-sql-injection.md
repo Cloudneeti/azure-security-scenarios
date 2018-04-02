@@ -103,8 +103,9 @@ Attack on web app with
 # Detect
 ###  Detection using OMS
 To detect the attack execute following query in Azure Log Analytics
-1. Go to Azure Portal --> navigate to resource group -sql-injection-attack-on-webapp  
-![](images/sql-inj-oms-location.png) 
+1. Go to Azure Portal --> navigate to resource group 'azuresecuritypoc-common-resources'  
+
+![](images/sql-inj-common-oms-location.png) 
 
 2. Go to Log analytics --> Click on Log Search --> Type query search 
 
