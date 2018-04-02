@@ -91,6 +91,13 @@ param (
     [switch]
     $Cleanup,
 
+    # use this switch to delete common deployed resources.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Cleanup"
+    )]
+    [switch]
+    $DeleteCommonResources,
+
     # use this switch for help cleanup deployed resources.
     [Parameter(Mandatory = $false,
         ParameterSetName = "EnableASC"
@@ -101,10 +108,24 @@ param (
     # provide email address for alerts from security center.
     [Parameter(Mandatory = $false,
         ParameterSetName = "EnableASC",
-        HelpMessage="Provide email address for recieving alerts from Azure Security Center.")]
+        HelpMessage = "Provide email address for recieving alerts from Azure Security Center.")]
     [Alias("email")]
     [string]
-    $EmailAddressForAlerts = "dummy@contoso.com"
+    $EmailAddressForAlerts = "dummy@contoso.com",
+
+    # Use this switch to skip OMS deployment
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Deployment"
+    )]
+    [switch]
+    $SkipOMSDeployment = $false,
+
+    # Use this switch to skip artifacts upload.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Deployment"
+    )]
+    [switch]
+    $SkipArtifactsUpload = $false
 
 )
 
@@ -121,6 +142,8 @@ $artifactStagingDirectories = @(
     "$PSScriptRoot\common"
     "$PSScriptRoot\resources"
 )
+$commonDeploymentResourceGroupName = "azuresecuritypoc-common-resources"
+$tmp = [System.IO.Path]::GetTempFileName()
 if ((Get-AzureRmContext).Subscription -eq $null) {
     if ($SubscriptionId -eq $null -or $UserName -eq $null -or $Password -eq $null) {
         throw "Kindly make sure SubscriptionID, Username and Password parameters are provided during the deployment."
@@ -139,50 +162,105 @@ if ((Get-AzureRmContext).Subscription -eq $null) {
 else {
     $subscriptionId = (Get-AzureRmContext).Subscription.Id
 }
-$artifactsResourceGroupName = 'azuresecuritypoc-artifacts-' + (Get-StringHash $subscriptionId).substring(0, 5) + '-rg'
-$deploymentHash = (Get-StringHash $artifactsResourceGroupName).substring(0, 10)
-$storageAccountName = 'stage' + $deploymentHash
+$deploymentHash = (Get-StringHash $SubscriptionId).substring(0, 10)
+$storageAccountName = 'azsecstage' + $deploymentHash
 if ($EnableSecurityCenter) {
     Write-Verbose "Enabling Azure Security Center and Policies."
     & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
     Break
 }
-
 $prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
 if ($Cleanup) {
     Write-Verbose "Intiating Cleanup for $Scenario"
     & "$PSScriptRoot\scenarios\$Scenario\scripts\cleanup.ps1" -Prefix $prefix -Verbose
     Break
 }
-
-# Create Resourcegroup
-New-AzureRmResourceGroup -Name $artifactsResourceGroupName -Location $Location -Force
-
-Write-Verbose "Check if artifacts storage account exists."
-$storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountName -eq $storageAccountName})
-
-# Create the storage account if it doesn't already exist
-if ($storageAccount -eq $null) {
-    Write-Verbose "Artifacts storage account does not exists."
-    Write-Verbose "Provisioning artifacts storage account."
-    $storageAccount = New-AzureRmStorageAccount -StorageAccountName $storageAccountName -Type 'Standard_LRS' `
-        -ResourceGroupName $artifactsResourceGroupName -Location $Location
-    Write-Verbose "Artifacts storage account provisioned."
-    Write-Verbose "Creating storage container to upload a blobs."
-    New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
+if ($DeleteCommonResources) {
+    try {
+        Write-Verbose "Deleting ResourceGroup - $commonDeploymentResourceGroupName"
+        Remove-AzureRmResourceGroup -Name $commonDeploymentResourceGroupName -Force
+    }
+    catch {
+        Throw $_
+    }
+    Write-Host "ResourceGroup - $commonDeploymentResourceGroupName deleted successfully."
 }
-else {
-    New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
-}
-#
-# Copy files from the local storage staging location to the storage account container
-foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
-    $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
-    foreach ($SourcePath in $ArtifactFilePaths) {
-        Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
-            -Container $storageContainerName -Context $storageAccount.Context -Force
+
+if ($SkipArtifactsUpload) {
+    Write-Verbose "Check if artifacts storage account exists."
+    $storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountName -eq $storageAccountName})
+    if ($storageAccount -eq $null) {
+        Throw "Artifacts storage account does not exists. Please run deployment without SkipArtifactsUpload switch."
+    }
+    else {
+        Write-Verbose "Skipped artifacts upload."
     }
 }
-#>
+else {
+    # Create Resourcegroup
+    New-AzureRmResourceGroup -Name $commonDeploymentResourceGroupName -Location $Location -Force
 
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose
+    Write-Verbose "Check if artifacts storage account exists."
+    $storageAccount = (Get-AzureRmStorageAccount | Where-Object {$_.StorageAccountName -eq $storageAccountName})
+
+    # Create the storage account if it doesn't already exist
+    if ($storageAccount -eq $null) {
+        Write-Verbose "Artifacts storage account does not exists."
+        Write-Verbose "Provisioning artifacts storage account."
+        $storageAccount = New-AzureRmStorageAccount -StorageAccountName $storageAccountName -Type 'Standard_LRS' `
+            -ResourceGroupName $commonDeploymentResourceGroupName -Location $Location
+        Write-Verbose "Artifacts storage account provisioned."
+        Write-Verbose "Creating storage container to upload a blobs."
+        New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
+    }
+    else {
+        New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue *>&1
+    }
+
+    # Copy files from the local storage staging location to the storage account container
+    foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
+        $ArtifactFilePaths = Get-ChildItem $ArtifactStagingDirectory -Recurse -File | ForEach-Object -Process {$_.FullName}
+        foreach ($SourcePath in $ArtifactFilePaths) {
+            Set-AzureStorageBlobContent -File $SourcePath -Blob $SourcePath.Substring((Split-Path($ArtifactStagingDirectory)).length + 1) `
+                -Container $storageContainerName -Context $storageAccount.Context -Force
+        }
+    }
+}
+
+if ($SkipOMSDeployment) {
+    $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azuresecuritypoc-common-resources | Where-Object DeploymentName -match 'oms').Outputs.workspaceName.Value
+    if ($omsWorkspaceName -eq $null) {
+        Throw "OMS workspace does not exist. Please run the deployment without SkipOMSDeployment switch"
+    }
+    else {
+        Write-Verbose "Skipped OMS deployment"
+    }
+}
+else {
+    Write-Verbose "Generate the value for artifacts location & 1 hour SAS token for the artifacts location."
+    $artifactsLocation = $storageAccount.Context.BlobEndPoint + $storageContainerName
+    $artifactsLocationSasToken = New-AzureStorageContainerSASToken -Container $storageContainerName -Context $storageAccount.Context -Permission r -ExpiryTime (Get-Date).AddHours(1)
+    Write-Verbose "SAS token for artifacts storage account generated successfully."
+    # Update parameter file with deployment values.
+    Write-Verbose "Updating parameter file."
+    $parametersObj = Get-Content -Path "$PSScriptRoot\scenarios\common-deployments\azuredeploy.parameters.json" | ConvertFrom-Json
+    $parametersObj.parameters.commonReference.value._artifactsLocation = $artifactsLocation
+    $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $artifactsLocationSasToken
+    ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
+    
+    # Create Resourcegroup
+    New-AzureRmResourceGroup -Name $commonDeploymentResourceGroupName -Location $Location -Force
+    
+    Write-Verbose "Initiate deployment for common resources"
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $commonDeploymentResourceGroupName `
+        -TemplateFile "$PSScriptRoot\scenarios\common-deployments\azuredeploy.json" `
+        -TemplateParameterFile $tmp -Name $commonDeploymentResourceGroupName -Mode Incremental `
+        -DeploymentDebugLogLevel All -Verbose -Force
+}
+
+
+$omsWorkspaceResourceGroupName = $commonDeploymentResourceGroupName
+$omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azuresecuritypoc-common-resources | Where-Object DeploymentName -match 'oms').Outputs.workspaceName.Value
+
+# Deploy Scenario
+& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose

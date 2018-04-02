@@ -10,13 +10,13 @@
         }
     },
     "variables": {
+        "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
         "vmNames": [
             "[concat(parameters('workload').virtualMachine.prefix,'-without-ep')]",
             "[concat(parameters('workload').virtualMachine.prefix,'-with-ep')]"
         ],
-        "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',uniqueString(resourceGroup().name))]",
-        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',uniqueString(resourceGroup().name))]",
-        "nsgName": "[concat(parameters('workload').nsg.prefix,'-',uniqueString(resourceGroup().name))]",
+        "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',variables('deploymentUniqueString'))]",
+        "nsgName": "[concat(parameters('workload').nsg.prefix,'-',variables('deploymentUniqueString'))]",
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
             "prefix": "[parameters('commonReference').prefix]"
@@ -41,31 +41,6 @@
                     },
                     "subnets": {
                         "value": "[parameters('workload').virtualNetwork.subnets]"
-                    },
-                    "location": {
-                        "value": "[parameters('commonReference').location]"
-                    },
-                    "tags": {
-                        "value": "[variables('tags')]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[variables('omsWorkspaceName')]",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.loganalytics/workspaces.json',parameters('commonReference')._artifactsLocationSasToken)]"
-                },
-                "parameters": {
-                    "omsWorkspaceName": {
-                        "value": "[variables('omsWorkspaceName')]"
-                    },
-                    "omsSolutionsName": {
-                        "value": "[parameters('workload').omsWorkspace.solutions]"
                     },
                     "location": {
                         "value": "[parameters('commonReference').location]"
@@ -116,7 +91,7 @@
                 },
                 "parameters": {
                     "publicIPAddressName": {
-                        "value": "[concat(variables('vmNames')[copyIndex()],'-',uniqueString(resourceGroup().name),'-pip')]"
+                        "value": "[concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip')]"
                     },
                     "publicIPAddressType": {
                         "value": "[parameters('workload').virtualMachine.pipAddressType]"
@@ -152,7 +127,7 @@
                         "value": "[concat(variables('vmNames')[copyIndex()],'-nic')]"
                     },
                     "publicIPAddressId": {
-                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames')[copyIndex()],'-',uniqueString(resourceGroup().name),'-pip'))]"
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip'))]"
                     },
                     "subnetId": {
                         "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'default')]"
@@ -213,8 +188,7 @@
             "apiVersion": "2015-06-15",
             "location": "[parameters('commonReference').location]",
             "dependsOn": [
-                "[concat(variables('vmNames')[copyIndex()])]",
-                "[variables('omsWorkspaceName')]"
+                "[concat(variables('vmNames')[copyIndex()])]"
             ],
             "copy": {
                 "name": "copy-monitoring-agent",
@@ -226,10 +200,10 @@
                 "typeHandlerVersion": "1.0",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                    "workspaceId": "[reference(variables('omsWorkspaceName')).outputs.workspaceId.value]"
+                    "workspaceId": "[reference(resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces/', parameters('commonReference').omsWorkspace.name), '2015-03-20').customerId]"
                 },
                 "protectedSettings": {
-                    "workspaceKey": "[reference(variables('omsWorkspaceName')).outputs.workspaceKey.value]"
+                    "workspaceKey": "[listKeys(resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces/', parameters('commonReference').omsWorkspace.name), '2015-03-20').primarySharedKey]"
                 }
             }
         },

@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "type": "secureObject"
+        },
+        "monitoring": {
+            "type": "secureObject"
+        }
+    },
+    "variables": {
+        "omsWorkspaceName": "[concat(parameters('monitoring').omsWorkspace.prefix,'-',uniqueString(subscription().id))]",
+        "tags": {
+            "deploymentName": "[parameters('commonReference').deploymentName]",
+            "prefix": "[parameters('commonReference').prefix]"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('omsWorkspaceName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.loganalytics/workspaces.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "omsWorkspaceName": {
+                        "value": "[variables('omsWorkspaceName')]"
+                    },
+                    "omsSolutionsName": {
+                        "value": "[parameters('monitoring').omsWorkspace.solutions]"
+                    },
+                    "sku": {
+                        "value": "[parameters('monitoring').omsWorkspace.sku]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "omsDeploymentName": {
+            "type": "string",
+            "value": "[variables('omsWorkspaceName')]"
+        }
+    }
+}

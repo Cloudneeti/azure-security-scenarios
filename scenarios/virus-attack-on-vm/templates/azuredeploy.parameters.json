@@ -9,7 +9,11 @@
                 "_artifactsLocationSasToken": "auto-update",
                 "location": "East US",
                 "deploymentPassword": "GY45s@67hx!K",
-                "prefix": "000"
+                "prefix": "000",
+                "omsWorkspace": {
+                    "resourceGroupName": "auto-update",
+                    "name": "auto-update"
+                }
             }
         },
         "workload": {
@@ -33,14 +37,6 @@
                     "osSku": "2012-R2-Datacenter",
                     "count": 2,
                     "pipAddressType": "dynamic"
-                },
-                "omsWorkspace": {
-                    "prefix": "oms",
-                    "solutions": [
-                        "Security",
-                        "AzureActivity",
-                        "AntiMalware"
-                    ]
                 },
                 "nsg": {
                     "prefix": "nsg",
