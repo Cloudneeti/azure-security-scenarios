@@ -33,10 +33,15 @@ param (
     [string]
     $artifactsStorageAccountName = $null,
 
-    [switch]
-    $UploadBlob
+    # Provide OMS Workspace Resourcegroup Name.
+    [Parameter(Mandatory = $true)]
+    [string]
+    $omsWorkspaceResourceGroupName,
 
-
+    # Provide OMS workspace name.
+    [Parameter(Mandatory = $true)]
+    [string]
+    $omsWorkspaceName    
 )
 
 $ErrorActionPreference = 'Stop'
@@ -126,7 +131,6 @@ foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
 $commonTemplateParameters[$artifactsLocation] = $storageAccount.Context.BlobEndPoint + $storageContainerName
 $commonTemplateParameters[$artifactsLocationSasToken] = New-AzureStorageContainerSASToken -Container $storageContainerName -Context $storageAccount.Context -Permission r -ExpiryTime (Get-Date).AddHours(4)
 
-
 # Update parameter file with deployment values.
 Write-Verbose "Get Parameter file"
 $parametersObj = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
@@ -134,6 +138,8 @@ Write-Verbose "Updating parameter file."
 $parametersObj.parameters.commonReference.value._artifactsLocation = $commonTemplateParameters[$artifactsLocation]
 $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters[$artifactsLocationSasToken]
 $parametersObj.parameters.commonReference.value.prefix = $Prefix
+$parametersObj.parameters.commonReference.value.omsWorkspace.resourceGroupName = $omsWorkspaceResourceGroupName
+$parametersObj.parameters.commonReference.value.omsWorkspace.name = $omsWorkspaceName
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
