@@ -111,7 +111,21 @@ param (
         HelpMessage = "Provide email address for recieving alerts from Azure Security Center.")]
     [Alias("email")]
     [string]
-    $EmailAddressForAlerts = "dummy@contoso.com"
+    $EmailAddressForAlerts = "dummy@contoso.com",
+
+    # Use this switch to skip OMS deployment
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Skip"
+    )]
+    [switch]
+    $SkipOMSDeployment,
+
+    # Use this switch to skip artifacts upload.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "EnableASC"
+    )]
+    [switch]
+    $SkipArtifactsUpload
 
 )
 
@@ -225,4 +239,4 @@ $omsWorkspaceResourceGroupName = $commonDeploymentResourceGroupName
 $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azuresecuritypoc-common-resources | ? DeploymentName -match 'oms').Outputs.workspaceName.Value
 
 # Deploy Scenario
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -Verbose
+& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose
