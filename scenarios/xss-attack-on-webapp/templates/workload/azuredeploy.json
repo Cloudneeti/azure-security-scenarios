@@ -11,7 +11,6 @@
     },
     "variables": {
         "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
-        "omsWorkspaceName": "[concat(parameters('workload').omsWorkspace.prefix,'-',variables('deploymentUniqueString'))]",
         "tags": {
             "deploymentName": "[parameters('commonReference').deploymentName]",
             "prefix": "[parameters('commonReference').prefix]"
@@ -238,7 +237,7 @@
                         "value": "[variables('applicationGateway')[copyIndex()].wafMode]"
                     },
                     "omsWorkspaceResourceId": {
-                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces',variables('omsWorkspaceName'))]"
+                        "value": "[resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces', parameters('commonReference').omsWorkspace.name)]"
                     }
                 }
             }
@@ -255,34 +254,6 @@
                 "parameters": {
                     "storageAccountName": {
                         "value": "[variables('diagStorageAccName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('commonReference').location]"
-                    },
-                    "tags": {
-                        "value": "[variables('tags')]"
-                    }
-                }
-            }
-        },
-        {
-            "apiVersion": "2017-05-10",
-            "name": "[variables('omsWorkspaceName')]",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.loganalytics/workspaces.json',parameters('commonReference')._artifactsLocationSasToken)]"
-                },
-                "parameters": {
-                    "omsWorkspaceName": {
-                        "value": "[variables('omsWorkspaceName')]"
-                    },
-                    "omsSolutionsName": {
-                        "value": "[parameters('workload').omsWorkspace.solutions]"
-                    },
-                    "sku": {
-                        "value": "[parameters('workload').omsWorkspace.sku]"
                     },
                     "location": {
                         "value": "[parameters('commonReference').location]"
@@ -428,7 +399,7 @@
             }
         },
         {
-            "condition":false,
+            "condition": false,
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('sqlServerName'),'-auditingSettings')]",
             "type": "Microsoft.Resources/deployments",
@@ -452,7 +423,7 @@
             }
         },
         {
-            "condition":false,
+            "condition": false,
             "apiVersion": "2017-05-10",
             "name": "[concat(variables('sqlServerName'),'-securityAlertPolicies')]",
             "type": "Microsoft.Resources/deployments",
@@ -482,7 +453,6 @@
             "name": "[parameters('workload').sqlServer.databases[0].name]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "[variables('omsWorkspaceName')]",
                 "[variables('sqlServerName')]"
             ],
             "properties": {
@@ -501,7 +471,7 @@
                         "value": "[parameters('workload').sqlServer.databases[0].name]"
                     },
                     "omsWorkspaceResourceId": {
-                        "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('omsWorkspaceName'))]"
+                        "value": "[resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces', parameters('commonReference').omsWorkspace.name)]"
                     },
                     "tags": {
                         "value": "[variables('tags')]"

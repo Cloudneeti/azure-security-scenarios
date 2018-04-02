@@ -37,7 +37,17 @@ param (
     HelpMessage="Provide email address for recieving threat detection alerts from Azure SQL.")]
     [Alias("email")]
     [string]
-    $EmailAddressForAlerts = "dummy@contoso.com"
+    $EmailAddressForAlerts = "dummy@contoso.com",
+
+    # Provide OMS Workspace Resourcegroup Name.
+    [Parameter(Mandatory = $true)]
+    [string]
+    $omsWorkspaceResourceGroupName,
+
+    # Provide OMS workspace name.
+    [Parameter(Mandatory = $true)]
+    [string]
+    $omsWorkspaceName    
 
 )
 
@@ -164,6 +174,8 @@ $parametersObj.parameters.commonReference.value._artifactsLocation = $commonTemp
 $parametersObj.parameters.commonReference.value._artifactsLocationSasToken = $commonTemplateParameters['_artifactsLocationSasToken']
 $parametersObj.parameters.commonReference.value.prefix = $Prefix
 $parametersObj.parameters.workload.value.sqlServer.sendAlertsTo = $EmailAddressForAlerts
+$parametersObj.parameters.commonReference.value.omsWorkspace.resourceGroupName = $omsWorkspaceResourceGroupName
+$parametersObj.parameters.commonReference.value.omsWorkspace.name = $omsWorkspaceName
 ( $parametersObj | ConvertTo-Json -Depth 10 ) -replace "\\u0027", "'" | Out-File $tmp
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
