@@ -21,7 +21,8 @@ It showcases following scenarios
 
 
 # Important Notes
-It takes few hours for OMS to pull logs for detection and prevention events
+It takes few hours for OMS to pull logs for detection and prevention events.
+
 
 # Prerequisites
 Access to Azure subscription to deploy following resources 
@@ -49,14 +50,17 @@ Access to Azure subscription to deploy following resources
 
     `.\deploy-azuresecurityscenarios.ps1 -Help`
 
-1. If you are using Cloud Shell you can simply pass 2 parameters to run the deployment.
+1. If you are using Cloud Shell you can simply pass 2 parameters to run the deployment. Deployment takes  40-45 mins to complete.
 
     `.\deploy-azuresecurityscenarios.ps1 -Scenario "sql-injection-attack-on-webapp" -Command Deploy  -Verbose`
 
-1. However, if you are running on a local machine pass additional parameters to connect to subscription and run the deployment.
+1. However, if you are running on a local machine pass additional parameters to connect to subscription and run the deployment. Deployment takes  40-45 mins to complete.
 
     `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario "sql-injection-attack-on-webapp" -Command Deploy   -Verbose`
 
+8. If security center is not enabled use following command to enable. Provide email address `<email id>` for notification
+
+    `.\deploy-azuresecurityscenarios.ps1 -EnableSecurityCenter -EmailAddressForAlerts <email id>`
 # Attack - 1
 Attack on web app with
 * Application gateway - WAF - Detection mode 
