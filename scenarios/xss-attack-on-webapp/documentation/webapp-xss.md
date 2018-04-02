@@ -52,7 +52,14 @@ Access to Azure subscription to deploy following resources
 8. If security center is not enabled use following command to enable. Provide email address `<email id>` for notification
 
     `.\deploy-azuresecurityscenarios.ps1 -EnableSecurityCenter -EmailAddressForAlerts <email id>`
+    
+8. Link Azure Security Center to OMS manually as shown in below screen shot
 
+
+    Azure Portal  - Security Center - Security policy - Select Subscription - Security policy - Data Collection
+
+    
+    ![](images/xss-asc-oms.png)
 # Attack
 Attack on web app with
 * Application gateway - WAF - Detection mode 
