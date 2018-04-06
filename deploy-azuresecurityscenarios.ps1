@@ -100,14 +100,14 @@ param (
 
     # use this switch for help cleanup deployed resources.
     [Parameter(Mandatory = $false,
-        ParameterSetName = "EnableASC"
+        ParameterSetName = "AzureSecurityCenter"
     )]
     [switch]
-    $EnableSecurityCenter,
+    $ConfigureASC,
 
     # provide email address for alerts from security center.
     [Parameter(Mandatory = $false,
-        ParameterSetName = "EnableASC",
+        ParameterSetName = "AzureSecurityCenter",
         HelpMessage = "Provide email address for recieving alerts from Azure Security Center.")]
     [Alias("email")]
     [string]
@@ -164,9 +164,9 @@ else {
 }
 $deploymentHash = (Get-StringHash $SubscriptionId).substring(0, 10)
 $storageAccountName = 'azsecstage' + $deploymentHash
-if ($EnableSecurityCenter) {
+if ($ConfigureASC) {
     Write-Verbose "Enabling Azure Security Center and Policies."
-    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
+    & "$PSScriptRoot\common\scripts\Configure-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
     Break
 }
 $prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
