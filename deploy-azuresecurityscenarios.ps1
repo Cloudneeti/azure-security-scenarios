@@ -258,9 +258,18 @@ else {
         -DeploymentDebugLogLevel All -Verbose -Force
 }
 
-
 $omsWorkspaceResourceGroupName = $commonDeploymentResourceGroupName
 $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azuresecuritypoc-common-resources | Where-Object DeploymentName -match 'oms').Outputs.workspaceName.Value
 
-# Deploy Scenario
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose
+switch ($Command) {
+    "Deploy" { 
+        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose     
+    }
+    "Remediate" {
+
+    }
+    "Attack" {
+
+    }
+}
+

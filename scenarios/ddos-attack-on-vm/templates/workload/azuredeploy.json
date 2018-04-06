@@ -1,0 +1,211 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "type": "secureObject"
+        },
+        "workload": {
+            "type": "secureObject"
+        }
+    },
+    "variables": {
+        "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
+        "vmNames": [
+            "[concat(parameters('workload').virtualMachine.prefix,'-without-ddos')]"
+        ],
+        "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',variables('deploymentUniqueString'))]",
+        "nsgName": "[concat(parameters('workload').nsg.prefix,'-',variables('deploymentUniqueString'))]",
+        "tags": {
+            "deploymentName": "[parameters('commonReference').deploymentName]",
+            "prefix": "[parameters('commonReference').prefix]"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/virtualnetworks.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "vnetName": {
+                        "value": "[variables('vnetName')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('workload').virtualNetwork.addressPrefix]"
+                    },
+                    "subnets": {
+                        "value": "[parameters('workload').virtualNetwork.subnets]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[variables('nsgName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/nsg.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "nsgName": {
+                        "value": "[variables('nsgName')]"
+                    },
+                    "securityRules": {
+                        "value": "[parameters('workload').nsg.securityRules]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('vmNames')[copyIndex()],'-pip')]",
+            "type": "Microsoft.Resources/deployments",
+            "copy": {
+                "name": "copy-pip",
+                "count": 1
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/publicipaddress.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "publicIPAddressName": {
+                        "value": "[concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip')]"
+                    },
+                    "publicIPAddressType": {
+                        "value": "[parameters('workload').virtualMachine.pipAddressType]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('vmNames')[copyIndex()],'-nic')]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "copy-pip",
+                "[variables('nsgName')]"
+            ],
+            "copy": {
+                "name": "copy-nic",
+                "count": 1
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.network/nic-with-pip.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "nicName": {
+                        "value": "[concat(variables('vmNames')[copyIndex()],'-nic')]"
+                    },
+                    "publicIPAddressId": {
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip'))]"
+                    },
+                    "subnetId": {
+                        "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'default')]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "nsgId": {
+                        "value": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat(variables('vmNames')[copyIndex()])]",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "copy-nic"
+            ],
+            "copy": {
+                "name": "copy-vm",
+                "count": 1
+            },
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('commonReference')._artifactsLocation,'/resources/microsoft.compute/vm.windows.json',parameters('commonReference')._artifactsLocationSasToken)]"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "[concat(variables('vmNames')[copyIndex()])]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('workload').virtualMachine.username]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('commonReference').deploymentPassword]"
+                    },
+                    "nicId": {
+                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNames')[copyIndex()],'-nic'))]"
+                    },
+                    "location": {
+                        "value": "[parameters('commonReference').location]"
+                    },
+                    "tags": {
+                        "value": "[variables('tags')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(concat(variables('vmNames')[copyIndex()]),'/OMSExtension')]",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('commonReference').location]",
+            "dependsOn": [
+                "[concat(variables('vmNames')[copyIndex()])]"
+            ],
+            "copy": {
+                "name": "copy-monitoring-agent",
+                "count": 1
+            },
+            "properties": {
+                "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                "type": "MicrosoftMonitoringAgent",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "workspaceId": "[reference(resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces/', parameters('commonReference').omsWorkspace.name), '2015-03-20').customerId]"
+                },
+                "protectedSettings": {
+                    "workspaceKey": "[listKeys(resourceId(parameters('commonReference').omsWorkspace.resourceGroupName,'Microsoft.OperationalInsights/workspaces/', parameters('commonReference').omsWorkspace.name), '2015-03-20').primarySharedKey]"
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
