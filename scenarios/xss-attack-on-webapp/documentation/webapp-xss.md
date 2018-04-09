@@ -2,7 +2,7 @@
 Showcase a Cross Site Scripting (XSS) attack and mitigation on a Web Application 
 
 # Overview
-It showcases following scenarios
+It showcases following use cases
 1. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application detects attack using application gateway
     * Application Gateway (WAF enabled-Detection mode)
   
@@ -12,7 +12,7 @@ It showcases following scenarios
   
 
 # Important Notes
-It takes few hours for OMS to pull logs for detection and prevention events
+First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS.
 
 
 # Prerequisites
@@ -49,9 +49,9 @@ Access to Azure subscription to deploy following resources
 
     `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario "xss-attack-on-webapp" -Command Deploy   -Verbose`
 
-8. If security center is not enabled use following command to enable. Provide email address `<email id>` for notification
+8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
 
-    `.\deploy-azuresecurityscenarios.ps1 -EnableSecurityCenter -EmailAddressForAlerts <email id>`
+    `.\deploy-azuresecurityscenarios.ps1 -ConfigureASC -EmailAddressForAlerts <email id>`
     
 8. Link Azure Security Center to OMS manually as shown in below screen shot
 
@@ -60,7 +60,7 @@ Access to Azure subscription to deploy following resources
 
     
     ![](images/xss-asc-oms.png)
-# Attack
+# Use case - 1 
 Attack on web app with
 * Application gateway - WAF - Detection mode 
  
@@ -108,7 +108,7 @@ To detect the attack execute following query in Azure Log Analytics
 
     ![](images/xss-oms-log-ana-location.png) 
     
-3. Following details gets logged 
+3. Following details gets logged. 
 
     ![](images/xss-log-analytics-det.png) 
     
@@ -120,9 +120,9 @@ To detect the attack execute following query in Azure Log Analytics
     
   
 
-## Detection after Prevention
+## Detection after Prevention (Use case - 2)
 
-* Execute the step 6 and 7 (Attack) to perform XSS attack, Application Gateway will prevent access
+* Execute the step 6 and 7  to perform XSS attack, Application Gateway will prevent access
 
     ![](images/403-forbidden-access-denied.png)  
 
@@ -135,7 +135,7 @@ To detect the attack execute following query in Azure Log Analytics
     ![](images/xss-log-analytics-blocked.png)  
 
 
-You will notice events related to detection and prevention items. It might take few hours for OMS to pull logs, so if you don't get any search results, please try again after sometime.
+You will notice events related to detection and prevention items. First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS, so if you don't get any search results, please try again after sometime.
 
 
 ## Clear Deployment 
