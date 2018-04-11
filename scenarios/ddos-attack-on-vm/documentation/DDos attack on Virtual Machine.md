@@ -11,7 +11,7 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
 # Prerequisites
 1. Azure subscription should regitered for DDoS protection.
-2. Use the private link to use DDoS protection feature. https://aka.ms/ddosprotectionplan
+2. Use the [private link](https://aka.ms/ddosprotectionplan) to use DDoS protection feature.
 3. Access to Azure subscription to deploy Virtual Machine with Virtual Network
 
 # Deploy
@@ -44,13 +44,13 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 8. To manually configure IIS server on VM follow below steps
     a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm"
     b. Select VM with name 'vm-with-ddos'
-        ![]("images/Select RG and VM.png")
+        ![](images/Select-RG-and-VM.png)
     c. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file. 
-        ![](images/Click on connect.png)
+        ![](images/Click-on-connect.png)
     d. Enter loginid=vmadmin and pwd=GY45s@67hx!K
     e. Open Server Manager and install Web Server (IIS).
-    ![](images/Select Add roles and feature.png)
-    ![](images/Install IIS Web Server on VM.png)
+    ![](images/Select-Add-roles-and-feature.png)
+    ![](images/Install-IIS-Web-Server-on-VM.png)
     
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
