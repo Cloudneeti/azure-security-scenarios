@@ -12,7 +12,7 @@
     "variables": {
         "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
         "vmNames": [
-            "[concat(parameters('workload').virtualMachine.prefix,'-without-ddos')]"
+            "[concat(parameters('workload').virtualMachine.prefix,'-with-ddos')]"
         ],
         "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',variables('deploymentUniqueString'))]",
         "nsgName": "[concat(parameters('workload').nsg.prefix,'-',variables('deploymentUniqueString'))]",
