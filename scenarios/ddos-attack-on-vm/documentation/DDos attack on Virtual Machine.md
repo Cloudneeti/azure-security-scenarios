@@ -44,7 +44,7 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 8. To manually configure IIS server on VM follow below steps
     a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm"
     b. Select VM with name 'vm-with-ddos'
-        ![](images/Select RG and VM.png)
+        ![]("images/Select RG and VM.png")
     c. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file. 
         ![](images/Click on connect.png)
     d. Enter loginid=vmadmin and pwd=GY45s@67hx!K
