@@ -12,7 +12,7 @@
         "prefix": "0003"
     },
     "ddos-attack-on-vm": {
-        "description": "SQL injection attack on a Web Application (Web App + SQL DB)",
+        "description": "DDoS attack on azure resources with public IP",
         "prefix": "0004"
     }    
 }

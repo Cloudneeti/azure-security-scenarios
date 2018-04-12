@@ -69,6 +69,7 @@ $commonTemplateParameters = New-Object -TypeName Hashtable # Will be used to pas
 $artifactsLocation = '_artifactsLocation'
 $artifactsLocationSasToken = '_artifactsLocationSasToken'
 $storageContainerName = "artifacts"
+$actionEmail = "Dummy@azuresecurityscenarious.com"
 
 if((Get-AzureRmContext).Subscription -eq $null){
     if ($SubscriptionId -eq $null -or $UserName -eq $null -or $Password -eq $null) {
@@ -153,3 +154,12 @@ $parametersObj.parameters.commonReference.value.omsWorkspace.name = $omsWorkspac
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
 New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+
+# Getting the deployment output for public IP resource Id
+ $deploymentOutputPIP = (Get-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -Name $armDeploymentName).Outputs.Values.value
+
+ #Getting the resource Id of Public IP
+$resourceId = (Get-AzureRmResource -ResourceGroupName $workloadResourceGroupName -ResourceName $test -ResourceType Microsoft.Network/publicIPAddresses).ResourceId
+
+# Configuring the Metrics Alert rule for under DDoS attack status
+Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Actions $actionEmail -Description "Under DDoS attack alert"

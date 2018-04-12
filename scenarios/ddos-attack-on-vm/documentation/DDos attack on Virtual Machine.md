@@ -44,13 +44,20 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 8. To manually configure IIS server on VM follow below steps
     a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm"
     b. Select VM with name 'vm-with-ddos'
+
         ![](images/select-rg-and-vm.png)
-    c. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file. 
+
+    c. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file.
+
         ![](images/click-on-connect.png)
-    d. Enter loginid=vmadmin and pwd=GY45s@67hx!K
+
+    d. Enter login username=vmadmin and password=GY45s@67hx!K
+    
     e. Open Server Manager and install Web Server (IIS).
-    ![](images/select-add-roles-and-feature.png)
-    ![](images/install-iis-web-Server-on-vm.png)
+
+        ![](images/select-add-roles-and-feature.png)
+    
+        ![](images/install-iis-web-Server-on-vm.png)
     
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
@@ -63,20 +70,46 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     Azure Portal  - Security Center - Security policy - Select Subscription - Security policy - Data Collection
 
     
-    ![](images/sql-inj-asc-oms.png)
+    ![](images/ddos-asc-oms.png)
     
 
 # Use case - 1 : Attack on VM without DDoS protection
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM w/o DDoS protection. In this case DDoS attack can not be detected, Azure Portal-->Resource Group --> VM --> Metrics.
-  ![](images/sql-inj-asc-oms.png)
+Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack can not be detected as shown in below images.
+To monitor from matrics to find public IP is under DDoS attack (Does not detect DDoS attack)
+    Azure Portal-->Resource Group --> VM --> Metrics --> Select below options
+    - Select specific Public IP in resource option 
+    - Under DDoS attack or not in metrics filter
+
+    ![](images/without-ddos-protection-under-attack.png)
+
+To monitor from matrics to find public IP inbound packets status (Does not detect DDoS attack)
+    Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter
+    - inbound packets DDoS
+    - inbound packets dropped DDoS
+    - inbound packets forwarded DDoS
+
+    ![](images/without-ddos-protection-inbound.png)
 
 # Use case - 2 : Attack on VM with DDoS protection 
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM with DDoS protection. In this case DDoS attack can  be detected, Azure Portal-->Resource Group --> VM --> Metrics.
-  ![](images/sql-inj-asc-oms.png)
+Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack is detected as shown in below images.
+To monitor from matrics to find public IP is under DDoS attack (Detect DDoS attack)
+    Azure Portal-->Resource Group --> VM --> Metrics --> Select below options
+    - Select specific Public IP in resource option 
+    - Under DDoS attack or not in metrics filter
+    
+    ![](images/monitoring-public-IP-under-DDoS-attack.png)
 
-  This attack can also be detected using email configuration at metrics level. PFB screen shot for alert email generated 
-  ![](images/sql-inj-asc-oms.png)
+To monitor from matrics to find public IP inbound packets status (Detect DDoS attack)
+    Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter
+    - inbound packets DDoS
+    - inbound packets dropped DDoS
+    - inbound packets forwarded DDoS
 
+  
+    ![](images/monitoring-inbound-packets-DDoS.png)
+
+  This attack can also be detected using email configuration at metrics level. Please follow below steps to configure email alret
+  
   This attack can also be detected using OMS. 
 
 
