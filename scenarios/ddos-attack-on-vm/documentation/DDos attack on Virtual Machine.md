@@ -119,9 +119,11 @@ To monitor from matrics to find public IP inbound packets status (Detect DDoS at
    ![](images/monitoring-inbound-packets-DDoS.png)
 
 
-  This attack can also be detected using email configuration at metrics level. Please follow below steps to configure email alret
+The email alert configured at metrics level, This will send the alert mail if VNet is under DDoS attack over last the 5 minutes <br />
+  ( Note: Deployment UserName is used to get the email alert for DDoS attack )
   
-  This attack can also be detected using OMS. 
+    
+   ![](images/ddoS-attack-mail-alert.png)]
 
 
     
