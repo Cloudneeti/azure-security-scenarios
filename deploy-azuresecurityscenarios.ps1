@@ -284,7 +284,7 @@ $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azure
 
 switch ($Command) {
     "Deploy" { 
-        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose     
+        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -UserName $UserName -Verbose     
     }
     "Remediate" {
 

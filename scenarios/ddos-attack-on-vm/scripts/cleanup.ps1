@@ -32,7 +32,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 Write-Verbose "Setting up deployment variables."
-$deploymentName = "virus-attack-on-vm"
+$deploymentName = "ddos-attack-on-vm"
 $workloadResourceGroupName = "{0}-{1}" -f $Prefix, $deploymentName
 
 try {

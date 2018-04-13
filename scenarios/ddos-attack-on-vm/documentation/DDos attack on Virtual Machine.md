@@ -41,8 +41,8 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
     `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario "ddos-attack-on-vm" -Command Deploy   -Verbose`
 
-8. To manually configure IIS server on VM follow below steps
-    a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm"
+8. To manually configure IIS server on VM follow below steps <br />
+    a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm" <br />
     b. Select VM with name 'vm-with-ddos'
 
 
@@ -87,6 +87,7 @@ To monitor from matrics to find public IP is under DDoS attack (Does not detect 
 
     ![](images/without-ddos-protection-under-attack.png)
 
+
 To monitor from matrics to find public IP inbound packets status (Does not detect DDoS attack)
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter
     - inbound packets DDoS
@@ -96,6 +97,7 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
 
     ![](images/without-ddos-protection-inbound.png)
 
+
 # Use case - 2 : Attack on VM with DDoS protection 
 Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack is detected as shown in below images.
 To monitor from matrics to find public IP is under DDoS attack (Detect DDoS attack)
@@ -103,8 +105,9 @@ To monitor from matrics to find public IP is under DDoS attack (Detect DDoS atta
     - Select specific Public IP in resource option 
     - Under DDoS attack or not in metrics filter
 
-    
+
     ![](images/monitoring-public-IP-under-DDoS-attack.png)
+
 
 To monitor from matrics to find public IP inbound packets status (Detect DDoS attack)
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter
@@ -114,6 +117,7 @@ To monitor from matrics to find public IP inbound packets status (Detect DDoS at
 
   
     ![](images/monitoring-inbound-packets-DDoS.png)
+
 
   This attack can also be detected using email configuration at metrics level. Please follow below steps to configure email alret
   
