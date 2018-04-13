@@ -83,9 +83,9 @@ To monitor from matrics to find public IP is under DDoS attack (Does not detect 
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options
     - Select specific Public IP in resource option 
     - Under DDoS attack or not in metrics filter
+    
 
-    ![](images/ddos-asc-oms.png)
-    ![](images/without-ddos-protection-under-attack.png)
+   ![](images/without-ddos-protection-under-attack.png)
 
 
 To monitor from matrics to find public IP inbound packets status (Does not detect DDoS attack)
@@ -95,7 +95,7 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
     - inbound packets forwarded DDoS
 
 
-    ![](images/without-ddos-protection-inbound.png)
+   ![](images/without-ddos-protection-inbound.png)
 
 
 # Use case - 2 : Attack on VM with DDoS protection 
@@ -106,7 +106,7 @@ To monitor from matrics to find public IP is under DDoS attack (Detect DDoS atta
     - Under DDoS attack or not in metrics filter
 
 
-    ![](images/monitoring-public-IP-under-DDoS-attack.png)
+   ![](images/monitoring-public-IP-under-DDoS-attack.png)
 
 
 To monitor from matrics to find public IP inbound packets status (Detect DDoS attack)
@@ -116,7 +116,7 @@ To monitor from matrics to find public IP inbound packets status (Detect DDoS at
     - inbound packets forwarded DDoS
 
   
-    ![](images/monitoring-inbound-packets-DDoS.png)
+   ![](images/monitoring-inbound-packets-DDoS.png)
 
 
   This attack can also be detected using email configuration at metrics level. Please follow below steps to configure email alret
