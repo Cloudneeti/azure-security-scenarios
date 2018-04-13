@@ -161,7 +161,7 @@ New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName
  #Getting the resource Id of Public IP
 $resourceId = (Get-AzureRmResource -ResourceGroupName $workloadResourceGroupName -ResourceName $deploymentOutputPIP -ResourceType Microsoft.Network/publicIPAddresses).ResourceId
 
-$actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName
+$actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName -WarningAction SilentlyContinue
  
 # Configuring the Metrics Alert rule for under DDoS attack status
-Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Actions $actionEmail -Description "Under DDoS attack alert"
+Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Actions $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
