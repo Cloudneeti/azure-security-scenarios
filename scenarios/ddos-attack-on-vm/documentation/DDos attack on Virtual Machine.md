@@ -84,7 +84,7 @@ To monitor from matrics to find public IP is under DDoS attack (Does not detect 
     - Select specific Public IP in resource option 
     - Under DDoS attack or not in metrics filter
 
-
+    ![](images/ddos-asc-oms.png)
     ![](images/without-ddos-protection-under-attack.png)
 
 
