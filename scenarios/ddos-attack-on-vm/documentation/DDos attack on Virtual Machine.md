@@ -45,19 +45,23 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     a. Go to Azure Portal --> Select Resource Groups services --> Select Resource Group - "0004-ddos-attack-on-vm"
     b. Select VM with name 'vm-with-ddos'
 
-        ![](images/select-rg-and-vm.png)
+
+    ![](images/select-rg-and-vm.png)
 
     c. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file.
 
-        ![](images/click-on-connect.png)
+
+    ![](images/click-on-connect.png)
 
     d. Enter login username=vmadmin and password=GY45s@67hx!K
     
     e. Open Server Manager and install Web Server (IIS).
 
-        ![](images/select-add-roles-and-feature.png)
-    
-        ![](images/install-iis-web-Server-on-vm.png)
+
+    ![](images/select-add-roles-and-feature.png)
+
+
+    ![](images/install-iis-web-Server-on-vm.png)
     
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
@@ -80,6 +84,7 @@ To monitor from matrics to find public IP is under DDoS attack (Does not detect 
     - Select specific Public IP in resource option 
     - Under DDoS attack or not in metrics filter
 
+
     ![](images/without-ddos-protection-under-attack.png)
 
 To monitor from matrics to find public IP inbound packets status (Does not detect DDoS attack)
@@ -87,6 +92,7 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
     - inbound packets DDoS
     - inbound packets dropped DDoS
     - inbound packets forwarded DDoS
+
 
     ![](images/without-ddos-protection-inbound.png)
 
@@ -96,6 +102,7 @@ To monitor from matrics to find public IP is under DDoS attack (Detect DDoS atta
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options
     - Select specific Public IP in resource option 
     - Under DDoS attack or not in metrics filter
+
     
     ![](images/monitoring-public-IP-under-DDoS-attack.png)
 
