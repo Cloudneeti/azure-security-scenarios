@@ -27,7 +27,7 @@ try {
         $moduleImportStatus = Get-Module -Name $module
         if ($moduleImportStatus -eq $null) {
             Write-Host "Importing - $module."
-            Import-Module -Name $module -RequiredVersion $requiredModules[$module]
+            Import-Module -Name $module
             Write-Host "Module - $module imported."
         }
     }
