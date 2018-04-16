@@ -12,4 +12,4 @@ Welcome to Azure Security Center Scenarios wiki!
 
 * [XSS attack on Azure Web App](https://github.com/AvyanConsultingCorp/azure-security-scenarios/blob/develop/scenarios/xss-attack-on-webapp/documentation/webapp-xss.md)
 
-* [DDoS attack on Virtual Machines](https://github.com/AvyanConsultingCorp/azure-security-scenarios/blob/develop/scenarios/ddos-attack-on-vm/documentation/ddos-attack-on-virtual-machine)
+* [DDoS attack on Virtual Machines](https://github.com/AvyanConsultingCorp/azure-security-scenarios/blob/develop/scenarios/ddos-attack-on-vm/documentation/ddos-attack-on-virtual-machine.md)
