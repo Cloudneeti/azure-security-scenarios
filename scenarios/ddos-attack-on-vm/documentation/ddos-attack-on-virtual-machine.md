@@ -61,20 +61,13 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     ![](images/select-add-roles-and-feature.png)
 
 
-    ![](images/install-iis-web-server-on-VM.png)
-    
+    ![](images/install-iis-web-Server-on-VM.png)
+               
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
 
     `.\deploy-azuresecurityscenarios.ps1 -ConfigureASC -EmailAddressForAlerts <email id>`
-    
-8. Link Azure Security Center to OMS manually as shown in below screen shot
 
-
-    Azure Portal  - Security Center - Security policy - Select Subscription - Security policy - Data Collection
-
-    
-    ![](images/ddos-asc-oms.png)
     
 
 # Use case - 1 : Attack on VM without DDoS protection
@@ -123,7 +116,7 @@ The email alert configured at metrics level, This will send the alert mail if VN
   ( Note: Deployment UserName is used to get the email alert for DDoS attack )
   
     
-   ![](images/ddoS-attack-mail-alert.png)]
+   ![](images/ddoS-attack-mail-alert.png)
 
 
     
