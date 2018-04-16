@@ -61,8 +61,7 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     ![](images/select-add-roles-and-feature.png)
 
 
-
-    ![](images/iinstall-iis-web-server-on-vm.png)
+    ![](images/install-iis-web-server-on-vm.png)
     
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
