@@ -7,7 +7,7 @@ It showcases following use cases
     * Virtual Network (VNet enabled DDoS basic protection)
 
 # Important Notes
-Azure DDoS Protection Standard is currently in preview. Protection is provided for any Azure resource that has an Azure public IP address associated to it, such as virtual machines, load balancers, and application gateways,You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. During preview, you are not charged for using the service.
+Azure DDoS Protection Standard is currently in preview. Protection is provided for any Azure resource that has an Azure public IP address associated to it. such as virtual machines, load balancers, and application gateways,You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. During preview, you are not charged for using the service.
 
 # Prerequisites
 1. Azure subscription should regitered for DDoS protection.
@@ -61,7 +61,8 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     ![](images/select-add-roles-and-feature.png)
 
 
-    ![](images/install-iis-web-Server-on-vm.png)
+
+    ![](images/iinstall-iis-web-server-on-vm.png)
     
     
 8. To configure Azure Security Center, pass `<ConfigureASC>`  switch and  email address `<email id>` for notification
