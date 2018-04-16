@@ -11,7 +11,7 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
 # Prerequisites
 1. Azure subscription should regitered for DDoS protection.
-2. Use the [private link](https://aka.ms/ddosprotectionplan) to use DDoS protection feature.
+2. Use the [private link](https://aka.ms/ddosprotectionplan) for DDoS protection feature.
 3. Access to Azure subscription to deploy Virtual Machine with Virtual Network
 
 # Deploy
