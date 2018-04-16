@@ -11,9 +11,7 @@
     },
     "variables": {
         "deploymentUniqueString": "[concat(substring(uniqueString(resourceGroup().name),0,5),substring(uniqueString(subscription().id),0,5))]",
-        "vmNames": [
-            "[concat(parameters('workload').virtualMachine.prefix,'-without-ddos')]"
-        ],
+        "vmNames": "[concat(parameters('workload').virtualMachine.prefix,'-with-ddos')]",
         "vnetName": "[concat(parameters('workload').virtualNetwork.prefix,'-',variables('deploymentUniqueString'))]",
         "nsgName": "[concat(parameters('workload').nsg.prefix,'-',variables('deploymentUniqueString'))]",
         "tags": {
@@ -77,12 +75,8 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmNames')[copyIndex()],'-pip')]",
+            "name": "[concat(variables('vmNames'),'-pip')]",
             "type": "Microsoft.Resources/deployments",
-            "copy": {
-                "name": "copy-pip",
-                "count": 1
-            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -90,7 +84,7 @@
                 },
                 "parameters": {
                     "publicIPAddressName": {
-                        "value": "[concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip')]"
+                        "value": "[concat(variables('vmNames'),'-',variables('deploymentUniqueString'),'-pip')]"
                     },
                     "publicIPAddressType": {
                         "value": "[parameters('workload').virtualMachine.pipAddressType]"
@@ -106,16 +100,12 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmNames')[copyIndex()],'-nic')]",
+            "name": "[concat(variables('vmNames'),'-nic')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "copy-pip",
+                "[concat(variables('vmNames'),'-pip')]",
                 "[variables('nsgName')]"
             ],
-            "copy": {
-                "name": "copy-nic",
-                "count": 1
-            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -123,10 +113,10 @@
                 },
                 "parameters": {
                     "nicName": {
-                        "value": "[concat(variables('vmNames')[copyIndex()],'-nic')]"
+                        "value": "[concat(variables('vmNames'),'-nic')]"
                     },
                     "publicIPAddressId": {
-                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames')[copyIndex()],'-',variables('deploymentUniqueString'),'-pip'))]"
+                        "value": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('vmNames'),'-',variables('deploymentUniqueString'),'-pip'))]"
                     },
                     "subnetId": {
                         "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets',variables('vnetName'),'default')]"
@@ -145,15 +135,11 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "[concat(variables('vmNames')[copyIndex()])]",
+            "name": "[concat(variables('vmNames'))]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "copy-nic"
+                "[concat(variables('vmNames'),'-nic')]"
             ],
-            "copy": {
-                "name": "copy-vm",
-                "count": 1
-            },
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -161,7 +147,7 @@
                 },
                 "parameters": {
                     "vmName": {
-                        "value": "[concat(variables('vmNames')[copyIndex()])]"
+                        "value": "[concat(variables('vmNames'))]"
                     },
                     "adminUsername": {
                         "value": "[parameters('workload').virtualMachine.username]"
@@ -170,7 +156,7 @@
                         "value": "[parameters('commonReference').deploymentPassword]"
                     },
                     "nicId": {
-                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNames')[copyIndex()],'-nic'))]"
+                        "value": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmNames'),'-nic'))]"
                     },
                     "location": {
                         "value": "[parameters('commonReference').location]"
@@ -183,16 +169,12 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(concat(variables('vmNames')[copyIndex()]),'/OMSExtension')]",
+            "name": "[concat(concat(variables('vmNames')),'/OMSExtension')]",
             "apiVersion": "2015-06-15",
             "location": "[parameters('commonReference').location]",
             "dependsOn": [
-                "[concat(variables('vmNames')[copyIndex()])]"
+                "[concat(variables('vmNames'))]"
             ],
-            "copy": {
-                "name": "copy-monitoring-agent",
-                "count": 1
-            },
             "properties": {
                 "publisher": "Microsoft.EnterpriseCloud.Monitoring",
                 "type": "MicrosoftMonitoringAgent",
@@ -207,5 +189,10 @@
             }
         }
     ],
-    "outputs": {}
+    "outputs": {
+        "publicIPAddressName": {
+            "type": "string",
+            "value": "[concat(variables('vmNames'),'-',variables('deploymentUniqueString'),'-pip')]"
+        }
+    }
 }

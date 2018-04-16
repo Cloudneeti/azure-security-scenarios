@@ -80,7 +80,7 @@ param (
     $UserName,
 
     # Enter AAD Username password as securestring.
-    [Parameter(Mandatory = $false,
+    [Parameter(Mandatory = $true,
         ParameterSetName = "Deployment"
     )]
     [Alias("pwd")]
@@ -159,6 +159,10 @@ $artifactStagingDirectories = @(
     "$PSScriptRoot\common"
     "$PSScriptRoot\resources"
 )
+
+# Checking for required modules and importing modules
+& "$PSScriptRoot\common\scripts\install-modules.ps1"
+
 $commonDeploymentResourceGroupName = "azuresecuritypoc-common-resources"
 $tmp = [System.IO.Path]::GetTempFileName()
 if ((Get-AzureRmContext).Subscription -eq $null) {
@@ -280,7 +284,7 @@ $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azure
 
 switch ($Command) {
     "Deploy" { 
-        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose     
+        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -UserName $UserName -Verbose     
     }
     "Remediate" {
 
