@@ -1,7 +1,17 @@
-﻿# Objective of the POC
+﻿# Table of Contents
+1. [Objectives](#objectives)
+2. [Overview](#overview)
+3. [Pre-requisites](#prerequisites)
+4. [Deploy](#deployment)
+5. [Perform Attack](#attack)
+6. [Detect Attack](#detect)
+7. [Respond/Mitigate](#mitigate)
+8. [Teardown Deployment](#teardown)
+
+# Objective of the POC <a name="objectives"></a>
 Showcase a SQL injection attack detection & prevention on a Web Application (Web App + SQL DB)
 
-# Overview
+# Overview <a name="overview"></a>
 It showcases following use cases
 1. Perform SQL injection attack on Web App with following configuration --> Application detects attack using application gateway
     * Application Gateway (WAF enabled-Detection mode)
@@ -17,21 +27,19 @@ It showcases following use cases
     * SQL DB with Threat Detection enabled and Send Alert To selected
 
 
+# Important Notes <a name="notes"></a>
+Although the deployment takes 10-15mins, the log aggregation by OMS take a few hours to get configured in the backend. You may not see attack/mitigation logs for detection and prevention events during the aggregation time window.   
+Subsequently logs will take 10-15 mins to reflect in OMS.
 
 
-
-# Important Notes
-First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS.
-
-
-# Prerequisites
+# Prerequisites <a name="prerequisites"></a>
 Access to Azure subscription to deploy following resources 
 1. Application gateway (WAF enabled)
 2. App Service (Web App)
 3. SQL Database 
 4. OMS (Monitoring)
 
-# Deploy
+# Deploy <a name="deployment"></a>
 
 1. Go to Edge Browser and Open [Azure Cloud Shell](https://shell.azure.com/)
 1. Change directory to CloudDrive directory 
@@ -70,7 +78,7 @@ Access to Azure subscription to deploy following resources
     
     ![](images/sql-inj-asc-oms.png)
     
-# Use case - 1
+# Perform Attack <a name="attack"></a>
 Attack on web app with
 * Application gateway - WAF - Detection mode 
 * SQL server and database with Threat Detection disabled. 
@@ -100,7 +108,7 @@ Attack on web app with
     ![](images/sql-inj-webapp-contoso-patients-attack-page.png)    
     
     
-# Detect
+# Detect  <a name="detect"></a>
 ###  Detection using OMS
 To detect the attack execute following query in Azure Log Analytics
 1. Go to Azure Portal --> navigate to resource group 'azuresecuritypoc-common-resources'  
@@ -127,14 +135,14 @@ To detect the attack execute following query in Azure Log Analytics
 
 ![](images/sql-inj-db-td-enabled.png)
 
-## Use case - 2
+## Monitor / Detect 
 
 Once Auditing & Threat Detection is database is enabled for SQL database, Azure Security Center sends email alert mentioned in Send alert to field. Execute the step 7 to perform SQL Injection attack
 
 ![](images/sql-inj-detection-mail.png)
 
 
-# Prevention
+# Mitigate <a name="mitigate"></a>
 
   * Update Web application firewall mode to Prevention for application gateway. This will take 5-10 mins. Hence we will connect the application using Application Gateway (WAF- Prevention mode) 
 
@@ -159,7 +167,7 @@ Once Auditing & Threat Detection is database is enabled for SQL database, Azure 
 
     You will notice events related to detection and prevention items. First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS, so if you don't get any search results, please try again after sometime.
     
-## Clear Deployment 
+## Teardown Deployment <a name="teardown"></a>
 
 Run following command to clear all the resources deployed during the demo.
 
