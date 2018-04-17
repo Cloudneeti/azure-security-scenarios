@@ -2,11 +2,27 @@
 .SYNOPSIS
     Short description
 .DESCRIPTION
-    Long description
+
+Copyright (c) Avyan Consulting Corp. All rights reserved.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is  furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  FITNESS FOR A PARTICULAR PURPOSE AND ONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 .EXAMPLE
-    Example of how to use this cmdlet
+    .\deploy-azuresecurityscenarios.ps1 -Help
+
+    Run this command to get list of supported scenarios
+
 .EXAMPLE
-    Another example of how to use this cmdlet
+    .\deploy-azuresecurityscenarios.ps1 -Scenario "virus-attack-on-vm" -Command Deploy -Verbose
+
+    If you are using Cloud Shell you can simply pass 2 parameters to run the deployment.
+
+.EXAMPLE
+    .\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario <scenario> -Command Deploy -Verbose
+
+    If you are running on a local machine pass additional parameters to connect to subscription and run the deployment.
+
 .INPUTS
     Inputs to this cmdlet (if any)
 .OUTPUTS
@@ -20,6 +36,7 @@
 .FUNCTIONALITY
     The functionality that best describes this cmdlet
 #>
+
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false,
@@ -63,7 +80,7 @@ param (
     $UserName,
 
     # Enter AAD Username password as securestring.
-    [Parameter(Mandatory = $false,
+    [Parameter(Mandatory = $true,
         ParameterSetName = "Deployment"
     )]
     [Alias("pwd")]
@@ -100,14 +117,14 @@ param (
 
     # use this switch for help cleanup deployed resources.
     [Parameter(Mandatory = $false,
-        ParameterSetName = "EnableASC"
+        ParameterSetName = "AzureSecurityCenter"
     )]
     [switch]
-    $EnableSecurityCenter,
+    $ConfigureASC,
 
     # provide email address for alerts from security center.
     [Parameter(Mandatory = $false,
-        ParameterSetName = "EnableASC",
+        ParameterSetName = "AzureSecurityCenter",
         HelpMessage = "Provide email address for recieving alerts from Azure Security Center.")]
     [Alias("email")]
     [string]
@@ -142,6 +159,10 @@ $artifactStagingDirectories = @(
     "$PSScriptRoot\common"
     "$PSScriptRoot\resources"
 )
+
+# Checking for required modules and importing modules
+& "$PSScriptRoot\common\scripts\install-modules.ps1"
+
 $commonDeploymentResourceGroupName = "azuresecuritypoc-common-resources"
 $tmp = [System.IO.Path]::GetTempFileName()
 if ((Get-AzureRmContext).Subscription -eq $null) {
@@ -164,9 +185,9 @@ else {
 }
 $deploymentHash = (Get-StringHash $SubscriptionId).substring(0, 10)
 $storageAccountName = 'azsecstage' + $deploymentHash
-if ($EnableSecurityCenter) {
+if ($ConfigureASC) {
     Write-Verbose "Enabling Azure Security Center and Policies."
-    & "$PSScriptRoot\common\scripts\Enable-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
+    & "$PSScriptRoot\common\scripts\Configure-AzureSecurityCenter.ps1" -EmailAddressForAlerts $EmailAddressForAlerts -Verbose
     Break
 }
 $prefix = ($scenarios | Select-Object -expandproperty $Scenario).prefix
@@ -258,9 +279,18 @@ else {
         -DeploymentDebugLogLevel All -Verbose -Force
 }
 
-
 $omsWorkspaceResourceGroupName = $commonDeploymentResourceGroupName
 $omsWorkspaceName = (Get-AzureRmResourceGroupDeployment -ResourceGroupName azuresecuritypoc-common-resources | Where-Object DeploymentName -match 'oms').Outputs.workspaceName.Value
 
-# Deploy Scenario
-& "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -Verbose
+switch ($Command) {
+    "Deploy" { 
+        & "$PSScriptRoot\scenarios\$Scenario\deploy.ps1" -Prefix $prefix -artifactsStorageAccountName $storageAccountName -omsWorkspaceResourceGroupName $omsWorkspaceResourceGroupName -omsWorkspaceName $omsWorkspaceName -UserName $UserName -Verbose     
+    }
+    "Remediate" {
+
+    }
+    "Attack" {
+
+    }
+}
+

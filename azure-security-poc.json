@@ -10,5 +10,9 @@
     "sql-injection-attack-on-webapp": {
         "description": "SQL injection attack on a Web Application (Web App + SQL DB)",
         "prefix": "0003"
-    }
+    },
+    "ddos-attack-on-vm": {
+        "description": "DDoS attack on azure resources with public IP",
+        "prefix": "0004"
+    }    
 }

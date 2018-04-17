@@ -1,3 +1,12 @@
+<#
+
+Copyright (c) Avyan Consulting Corp. All rights reserved.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is  furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  FITNESS FOR A PARTICULAR PURPOSE AND ONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+#>
+
 [CmdletBinding()]
 param (
     # Enter prefix for Resource Groups
@@ -144,3 +153,10 @@ $parametersObj.parameters.commonReference.value.omsWorkspace.name = $omsWorkspac
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
 New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+
+Write-Verbose "Collecting details of VM login Username and Password"
+$outputValues = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
+$vmUsername = $outputValues.parameters.workload.value.virtualMachine.username
+$vmPassword = $outputValues.parameters.commonReference.value.deploymentPassword
+Write-Host "VM login Username : " $vmUsername
+Write-Host "VM login Password : " $vmPassword

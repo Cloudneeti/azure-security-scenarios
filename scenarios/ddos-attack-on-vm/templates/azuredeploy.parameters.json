@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "commonReference": {
+            "value": {
+                "deploymentName": "ddos-attack-on-vm",
+                "_artifactsLocation": "auto-update",
+                "_artifactsLocationSasToken": "auto-update",
+                "location": "East US",
+                "deploymentPassword": "GY45s@67hx!K",
+                "prefix": "000",
+                "omsWorkspace": {
+                    "resourceGroupName": "auto-update",
+                    "name": "auto-update"
+                }
+            }
+        },
+        "workload": {
+            "value": {
+                "virtualNetwork": {
+                    "prefix": "vnet",
+                    "addressPrefix": "10.1.0.0/16",
+                    "subnets": [
+                        {
+                            "name": "default",
+                            "properties": {
+                                "addressPrefix": "10.1.0.0/24"
+                            }
+                        }
+                    ]
+                },
+                "virtualMachine": {
+                    "prefix": "vm",
+                    "username": "vmadmin",
+                    "size": "Standard_DS2_v2",
+                    "osSku": "2012-R2-Datacenter",
+                    "count": 2,
+                    "pipAddressType": "dynamic"
+                },
+                "nsg": {
+                    "prefix": "nsg",
+                    "securityRules": [
+                        {
+                            "name": "allow-inbound-http",
+                            "properties": {
+                                "protocol": "Tcp",
+                                "sourcePortRange": "*",
+                                "destinationPortRange": "80",
+                                "sourceAddressPrefix": "*",
+                                "destinationAddressPrefix": "*",
+                                "access": "Allow",
+                                "priority": 1000,
+                                "direction": "Inbound"
+                            }
+                        },
+                        {
+                            "name": "allow-inbound-rdp",
+                            "properties": {
+                                "protocol": "Tcp",
+                                "sourcePortRange": "*",
+                                "destinationPortRange": "3389",
+                                "sourceAddressPrefix": "*",
+                                "destinationAddressPrefix": "*",
+                                "access": "Allow",
+                                "priority": 2000,
+                                "direction": "Inbound"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
