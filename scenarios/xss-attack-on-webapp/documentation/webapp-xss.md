@@ -1,6 +1,18 @@
-﻿# Objective of the POC
+﻿# Table of Contents
+1. [Objectives](#objectives)
+2. [Overview](#overview)
+3. [Pre-requisites](#prerequisites)
+4. [Deploy](#deployment)
+5. [Perform Attack](#attack)
+6. [Detect Attack](#detect)
+7. [Respond/Mitigate](#mitigate)
+8. [Teardown Deployment](#teardown)
+
+<a name="objectives"></a>
+# Objective of the POC
 Showcase a Cross Site Scripting (XSS) attack and mitigation on a Web Application 
 
+<a name="overview"></a>
 # Overview
 It showcases following use cases
 1. Perform XSS (Cross Site Scripting) attack on Web App with following configuration --> Application detects attack using application gateway
@@ -11,10 +23,10 @@ It showcases following use cases
     * Application Gateway (WAF enabled-Prevention mode)
   
 
-# Important Notes
+# Important Notes <a name="notes"></a>
 First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS.
 
-
+<a name="prerequisites"></a>
 # Prerequisites
 Access to Azure subscription to deploy following resources 
 1. Application gateway (WAF enabled)
@@ -22,6 +34,7 @@ Access to Azure subscription to deploy following resources
 3. SQL Database 
 4. OMS (Monitoring)
 
+<a name="deployment"></a>
 # Deploy
 
 1. Go to Edge Browser and Open [Azure Cloud Shell](https://shell.azure.com/)
@@ -60,7 +73,8 @@ Access to Azure subscription to deploy following resources
 
     
     ![](images/xss-asc-oms.png)
-# Use case - 1 
+<a name="attack"></a>
+# Perform Attack 
 Attack on web app with
 * Application gateway - WAF - Detection mode 
  
@@ -95,7 +109,7 @@ Attack on web app with
 
     ![](images/xss-attack-dashboard.png)    
     
-    
+<a name="detect"></a>    
 # Detect
 To detect the attack execute following query in Azure Log Analytics
 1. Go to Azure Portal --> navigate to resource group 'azuresecuritypoc-common-resources' 
@@ -112,7 +126,8 @@ To detect the attack execute following query in Azure Log Analytics
 
     ![](images/xss-log-analytics-det.png) 
     
-# Prevention
+<a name="mitigate"></a>
+# Mitigate 
 
   * Update Web application firewall mode to Prevention for application gateway. This will take 5-10 mins. Hence we will connect the application using Application Gateway (WAF- Prevention mode) 
 
@@ -120,7 +135,7 @@ To detect the attack execute following query in Azure Log Analytics
     
   
 
-## Detection after Prevention (Use case - 2)
+## Detection after Mitigation 
 
 * Execute the step 6 and 7  to perform XSS attack, Application Gateway will prevent access
 
@@ -138,7 +153,8 @@ To detect the attack execute following query in Azure Log Analytics
 You will notice events related to detection and prevention items. First time it takes few hours for OMS to pull logs for detection and prevention events. For subsequent requests it takes 10-15 mins to reflect in OMS, so if you don't get any search results, please try again after sometime.
 
 
-## Clear Deployment 
+<a name="teardown"></a>
+## Teardown Deployment 
 
 Run following command to clear all the resources deployed during the demo.
 

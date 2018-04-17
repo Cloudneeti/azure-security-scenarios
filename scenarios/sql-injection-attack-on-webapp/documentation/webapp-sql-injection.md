@@ -157,7 +157,7 @@ Once Auditing & Threat Detection is database is enabled for SQL database, Azure 
     
   
 
-## Prevention Detection
+## Detection after Mitigation
 
 * Execute the step 7 to perform SQL Injection attack, Application Gateway will prevent access
 
