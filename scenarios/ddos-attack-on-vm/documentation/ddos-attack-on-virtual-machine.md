@@ -97,11 +97,11 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
     
     b. Enter details 
 
-    ![](images/ddos-standard-plan-2.png)
+   ![](images/ddos-standard-plan-2.png)
 
     c. Configure standard DDoS protection plan on VNet
 
-    ![](images/select-standard-ddos-on-vnet.png)
+   ![](images/select-standard-ddos-on-vnet.png)
 
 
 <a name="attack"></a>
