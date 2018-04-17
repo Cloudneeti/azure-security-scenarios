@@ -93,15 +93,15 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
     a. Go to Azure Portal --> Click on "Create a resource" --> Search "DDoS protection plan"
 
-        ![](images/ddos-standard-plan-1.png)
+      ![](images/ddos-standard-plan-1.png)
     
     b. Enter details 
 
-        ![](images/ddos-standard-plan-2.png)
+      ![](images/ddos-standard-plan-2.png)
 
     c. Configure standard DDoS protection plan on VNet
 
-        ![](images/select-standard-ddos-on-vnet.png)
+      ![](images/select-standard-ddos-on-vnet.png)
 
 
 <a name="attack"></a>
@@ -148,12 +148,6 @@ To monitor from matrics to find public IP inbound packets status (Detect DDoS at
    ![](images/monitoring-inbound-packets-DDoS.png)
 
 
-The email alert configured at metrics level, This will send the alert mail if VNet is under DDoS attack over last the 5 minutes <br />
-  ( Note: Deployment UserName is used to get the email alert for DDoS attack )
-  
-    
-   ![](images/ddoS-attack-mail-alert.png)
-
 <a name="detect"></a>
 
 # Detect and mitigate attack
@@ -164,6 +158,13 @@ To monitor network in and network out follow below steps <br />
 
    ![](images/monitoring-network-in-out.png)
     
+
+The email alert configured at metrics level, This will send the alert mail if VNet is under DDoS attack over last the 5 minutes <br />
+  ( Note: Deployment UserName is used to get the email alert for DDoS attack )
+  
+    
+   ![](images/ddoS-attack-mail-alert.png)
+   
 
 <a name="teardown"></a>
 
