@@ -93,15 +93,15 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
     a. Go to Azure Portal --> Click on "Create a resource" --> Search "DDoS protection plan"
 
-    ![](images/ddos-standard-plan-1.png)
+      ![](images/ddos-standard-plan-1.png)
     
     b. Enter details 
 
-   ![](images/ddos-standard-plan-2.png)
+      ![](images/ddos-standard-plan-2.png)
 
     c. Configure standard DDoS protection plan on VNet
 
-   ![](images/select-standard-ddos-on-vnet.png)
+      ![](images/select-standard-ddos-on-vnet.png)
 
 
 <a name="attack"></a>
