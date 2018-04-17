@@ -26,6 +26,8 @@ It showcases following use cases
 # Important Notes
 Azure DDoS Protection Standard is currently in preview. Protection is provided for any Azure resource that has an Azure public IP address associated to it. such as virtual machines, load balancers, and application gateways,You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. During preview, you are not charged for using the service.
 
+Note : To register DDoS protection service on subscription [visit this link](http://aka.ms/ddosprotection)
+
 <a name="prerequisites"></a>
 
 # Prerequisites
