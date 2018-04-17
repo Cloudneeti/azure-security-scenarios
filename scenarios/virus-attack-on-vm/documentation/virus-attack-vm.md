@@ -1,4 +1,42 @@
-﻿# Deploy
+﻿# Table of Contents
+1. [Objectives](#objectives)
+2. [Overview](#overview)
+3. [Pre-requisites](#prerequisites)
+4. [Deploy](#deployment)
+5. [Perform Attack](#attack)
+6. [Detect Attack](#detect)
+7. [Respond/Mitigate](#mitigate)
+8. [Teardown Deployment](#teardown)
+
+<a name="objectives"></a>
+# Objective of the POC 
+Showcase a Virus attack on a Virtual Machine detection & prevention.
+
+<a name="overview"></a>
+# Overview
+It showcases following use cases
+1. Perform Virus attack on a Virtual Machine --> 
+
+    * VM without Endpoint Protection
+
+2. Perform Virus attack on a Virtual Machine --> 
+
+    * VM with Endpoint Protection
+
+
+# Important Notes <a name="notes"></a>
+Although the deployment takes 10-15mins, the log aggregation by OMS take a few hours to get configured in the backend. You may not see attack/mitigation logs for detection and prevention events during the aggregation time window.   
+Subsequently logs will take 10-15 mins to reflect in OMS.
+
+
+<a name="prerequisites"></a>
+# Prerequisites
+Access to Azure subscription to deploy following resources 
+1. Virtual Machine
+2. OMS (Monitoring)
+
+<a name="deployment"></a>
+# Deploy
 
 1. Go to Edge Browser and Open [Azure Cloud Shell](https://shell.azure.com/)
 1. Change directory to CloudDrive directory 
@@ -25,7 +63,8 @@
 
    `.\deploy-azuresecurityscenarios.ps1 -SubscriptionId <subscriptionId> -UserName <username> -Password <securePassword> -Scenario <scenario> -Command Deploy  -Verbose`
 
-# Attack
+<a name="attack"></a>
+# Perform Attack 
 
 Attack on VM without an Endpoint Protection.
 
@@ -51,7 +90,8 @@ Attack on VM without an Endpoint Protection.
 
 8. You will notice that Virus file gets downloads successfully on VM indicating attack was successful.
 
-# Prevention
+<a name="mitigate"></a>
+# Mitigate
 
 Azure Security Center gives you recommendations and also allows you to perform remediation steps from the console itself.
 
@@ -101,6 +141,23 @@ To access endpoint protection client, you need to clean SCEP Policy on Windows w
    ![](images/search-eicar.png)
 
 You will notice events related to Quarantined items. It might take few minutes for OMS to pull logs from virtual machine, so if you don't get any search results, please try again after sometime.
+
+
+    
+<a name="teardown"></a>
+## Teardown Deployment 
+
+Run following command to clear all the resources deployed during the demo.
+
+```
+.\deploy-azuresecurityscenarios.ps1 -Scenario virus-attack-on-vm -Cleanup 
+```
+
+Verification steps -
+1. Login to Azure Portal / Subscription
+2. Check if all the ResourceGroup with deploymentSuffix is cleared.
+
+
 
 References -
 
