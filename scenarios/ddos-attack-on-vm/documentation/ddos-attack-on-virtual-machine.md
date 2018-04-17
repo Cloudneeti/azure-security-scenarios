@@ -74,7 +74,7 @@ Azure DDoS Protection Standard is currently in preview. Protection is provided f
 
     ![](images/click-on-connect.png)
 
-    d. Enter login username=vmadmin and password=GY45s@67hx!K
+    d. Enter login details (The VM login username and password is in deployment powershell output)
     
     e. Open Server Manager and install Web Server (IIS).
 
@@ -125,7 +125,7 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
     - inbound packets forwarded DDoS  <br />
 
 
-   ![](images/without-ddos-protection-inbound.png)
+  ![](images/without-ddos-protection-inbound.png)
 
  * Attack on VM with DDoS protection 
 Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack is detected as shown in below images. <br />
@@ -162,7 +162,7 @@ The DDoS protection detects and mitigates attack within 2 minitues. <br />
 To monitor network in and network out follow below steps <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select VM name in resource --> select netork in / out in metrics filter
 
-    ![](images/monitoring-network-in-out.png)
+   ![](images/monitoring-network-in-out.png)
     
 
 <a name="teardown"></a>
