@@ -127,7 +127,7 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
 
   ![](images/without-ddos-protection-inbound.png)
 
- ### Attack on VM with DDoS protection <br />
+ ### * Attack on VM with DDoS protection <br />
 Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack is detected as shown in below images. <br />
 To monitor from matrics to find public IP is under DDoS attack (Detect DDoS attack)  <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options  <br />
