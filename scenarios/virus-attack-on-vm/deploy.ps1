@@ -153,3 +153,10 @@ $parametersObj.parameters.commonReference.value.omsWorkspace.name = $omsWorkspac
 
 Write-Verbose "Initiate Deployment for TestCase - $Prefix"
 New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
+
+Write-Verbose "Collecting details of VM login Username and Password"
+$outputValues = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
+$vmUsername = $outputValues.parameters.workload.value.virtualMachine.username
+$vmPassword = $outputValues.parameters.commonReference.value.deploymentPassword
+Write-Host "VM login Username : " $vmUsername
+Write-Host "VM login Password : " $vmPassword

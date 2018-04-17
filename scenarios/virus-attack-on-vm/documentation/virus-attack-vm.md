@@ -78,7 +78,7 @@ Attack on VM without an Endpoint Protection.
 3. On Properties Page --> Click Connect to Download RDP file --> Save and Open RDP file.
 ![](images/access-vm-0.png)
 
-4. Enter loginid=vmadmin and pwd=GY45s@67hx!K 
+4. Enter login details (The VM login username and password is in deployment powershell output)
 
 5. Open Server Manager and Disable Internet Explorer Enhanced Security Configuration.
 ![](images/disable-internet-explorer-enhanced-security-configuration.png)
@@ -104,7 +104,7 @@ Azure Security Center gives you recommendations and also allows you to perform r
 
 # Attack & Detection
 
-Anti-malware Extension (Endpoint Protection) might take 5-10 mins to get installed on a VM. Hence, you will use another VM with name "vm-with-ep" which already has Anti-malware extension installed further for our Demo using loginid=vmadmin and pwd=GY45s@67hx!K
+Anti-malware Extension (Endpoint Protection) might take 5-10 mins to get installed on a VM. Hence, you will use another VM with name "vm-with-ep" which already has Anti-malware extension installed further for our Demo using loginid and pwd (The VM login username and password is in deployment powershell output)
 
 To perform attack open Internet Explorer and Download (https://secure.eicar.org/eicar.com.txt)
 
