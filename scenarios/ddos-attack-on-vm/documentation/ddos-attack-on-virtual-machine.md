@@ -138,7 +138,7 @@ Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM wit
 
 # Detect and mitigate attack
 
-The DDoS attack is detected as shown in below images. <br />
+The DDoS attack on VM with DDoS protection is detect and mitigated as shown in below images. <br />
 To monitor from metrics to find public IP is under DDoS attack (Detect DDoS attack)  <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options  <br />
     - Select specific Public IP in resource option   <br />
