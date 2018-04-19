@@ -174,7 +174,7 @@ The email alert configured at metrics level, This will send the alert mail if VN
 
 <a name="teardown"></a>
 
-## Clear Deployment 
+## Teardown Deployment 
 
 Run following command to clear all the resources deployed during the demo.
 
