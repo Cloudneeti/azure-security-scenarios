@@ -19,7 +19,7 @@ Showcase DDoS protection on azure resources with public IP
 # Overview
 It showcases following use cases
 1. Perform DDoS attack on resources in a virtual network including public IP addresses associated with virtual machines by following configuration --> DDoS protection detects attack and mitigate the DDoS attack and send alert.
-    * Virtual Network (VNet enabled DDoS basic protection)
+    * Virtual Network (VNet enabled DDoS protection)
 
 <a name="important-notes"></a>
 
@@ -91,7 +91,7 @@ Note : To register DDoS protection service on subscription [visit this link](htt
 
     `.\deploy-azuresecurityscenarios.ps1 -ConfigureASC -EmailAddressForAlerts <email id>`
 
-10. To Create standard DDoS plan and configure with virtual network <br />
+10. To create standard DDoS plan and configure with virtual network <br />
 
     a. Go to Azure Portal --> Click on "Create a resource" --> Search "DDoS protection plan"
 
@@ -109,18 +109,20 @@ Note : To register DDoS protection service on subscription [visit this link](htt
 <a name="attack"></a>
 
 # Perform 
- ### * Attack VM without DDoS protection <br />
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack can not be detected as shown in below images. <br />
-To monitor from matrics to find public IP is under DDoS attack (Does not detect DDoS attack)  <br />
+ ### * Attack VM without DDoS protection & analyze <br />
+Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a Microsoft Azure support request for simulation of a DDoS attack on infrastructure <br />
+
+In this case DDoS attack can not be detected as shown in below images. <br />
+To monitor from metrics to find public IP is under DDoS attack (Does not detect DDoS attack)  <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options  <br />
     - Select specific Public IP in resource option   <br />
-    - Under DDoS attack or not in metrics filter  <br />
+    - "Under DDoS attack or not" in metrics filter  <br />
     
 
    ![](images/without-ddos-protection-under-attack.png)
 
 
-To monitor from matrics to find public IP inbound packets status (Does not detect DDoS attack) <br />
+To monitor from metrics to find public IP inbound packets status (Does not detect DDoS attack) <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter  <br />
     - inbound packets DDoS  <br />
     - inbound packets dropped DDoS  <br />
@@ -130,17 +132,23 @@ To monitor from matrics to find public IP inbound packets status (Does not detec
   ![](images/without-ddos-protection-inbound.png)
 
  ### * Attack on VM with DDoS protection <br />
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. In this case DDoS attack is detected as shown in below images. <br />
-To monitor from matrics to find public IP is under DDoS attack (Detect DDoS attack)  <br />
+Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a Microsoft Azure support request for simulation of a DDoS attack on infrastructure <br />
+
+<a name="detect"></a>
+
+# Detect and mitigate attack
+
+The DDoS attack is detected as shown in below images. <br />
+To monitor from metrics to find public IP is under DDoS attack (Detect DDoS attack)  <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options  <br />
     - Select specific Public IP in resource option   <br />
-    - Under DDoS attack or not in metrics filter  <br />
+    - "Under DDoS attack or not" in metrics filter  <br />
  
 
    ![](images/monitoring-public-IP-under-DDoS-attack.png)
 
 
-To monitor from matrics to find public IP inbound packets status (Detect DDoS attack) <br />
+To monitor from metrics to find public IP inbound packets status (Detect DDoS attack) <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options from metrics filter  <br />
     - inbound packets DDoS  <br />
     - inbound packets dropped DDoS  <br />
@@ -150,11 +158,7 @@ To monitor from matrics to find public IP inbound packets status (Detect DDoS at
    ![](images/monitoring-inbound-packets-DDoS.png)
 
 
-<a name="detect"></a>
-
-# Detect and mitigate attack
 The DDoS protection detect and mitigates the attack on VM. The below image of network metrics of VM while network in attack. <br />
-The DDoS protection detects and mitigates attack within 2 minitues. <br />
 To monitor network in and network out follow below steps <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select VM name in resource --> select netork in / out in metrics filter
 
