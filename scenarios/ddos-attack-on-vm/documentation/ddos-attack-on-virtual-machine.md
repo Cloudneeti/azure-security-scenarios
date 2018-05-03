@@ -11,7 +11,7 @@
 
 <a name="objectives"></a>
 
-# Objective of the POC
+# Objective of the POC  
 Showcase DDoS protection on azure resources with public IP
 
 <a name="overview"></a>
@@ -24,7 +24,7 @@ It showcases following use cases
 <a name="important-notes"></a>
 
 # Important Notes
-Azure DDoS Protection Standard is currently in preview. Protection is provided for any Azure resource that has an Azure public IP address associated to it. such as virtual machines, load balancers, and application gateways,You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. During preview, you are not charged for using the service.
+Azure DDoS Protection is provided for any Azure resource that has an Azure public IP address associated to it. such as virtual machines, load balancers, and application gateways. You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. 
 
 Note : To register DDoS protection service on subscription [visit this link](http://aka.ms/ddosprotection)
 
@@ -110,7 +110,7 @@ Note : To register DDoS protection service on subscription [visit this link](htt
 
 # Perform 
  ### * Attack VM without DDoS protection & analyze <br />
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a Microsoft Azure support request for simulation of a DDoS attack on infrastructure <br />
+Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection  <br />
 
 In this case DDoS attack can not be detected as shown in below images. <br />
 To monitor from metrics to find public IP is under DDoS attack (Does not detect DDoS attack)  <br />
@@ -132,7 +132,9 @@ To monitor from metrics to find public IP inbound packets status (Does not detec
   ![](images/without-ddos-protection-inbound.png)
 
  ### * Attack on VM with DDoS protection <br />
-Microsoft Support team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a Microsoft Azure support request for simulation of a DDoS attack on infrastructure <br />
+
+Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM with DDoS protection <br />
+
 
 <a name="detect"></a>
 
@@ -191,8 +193,8 @@ Verification steps -
 
 **References** 
 
-https://docs.microsoft.com/en-us/azure/virtual-network/ddos-protection-overview
 
-https://azure.microsoft.com/en-in/blog/azure-ddos-protection-service-preview/
+1.	 DDoS Blog: http://aka.ms/ddosblog
+2.	DDoS Protection overview: http://aka.ms/ddosprotectiondocs
+3.	DDoS Standard best practices & reference architecture : http://aka.ms/ddosbest 
 
-https://azure.microsoft.com/en-in/pricing/details/ddos-protection/
