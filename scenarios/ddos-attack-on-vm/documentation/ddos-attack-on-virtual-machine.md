@@ -12,19 +12,20 @@
 <a name="objectives"></a>
 
 # Objective of the POC  
-Showcase DDoS protection on azure resources with public IP
+Showcase DDoS Protection Standard on Azure resources with public IP
 
 <a name="overview"></a>
 
 # Overview
 It showcases following use cases
-1. Perform DDoS attack on resources in a virtual network including public IP addresses associated with virtual machines by following configuration --> DDoS protection detects attack and mitigate the DDoS attack and send alert.
-    * Virtual Network (VNet enabled DDoS protection)
+1. Perform DDoS attack on resources in a virtual network including public IP addresses associated with virtual machines by following configuration --> DDoS Protection Standard detects attack and mitigate the DDoS attack and send alert.
+    * Virtual Network (VNet enabled DDoS Protection Standard)
 
 <a name="important-notes"></a>
 
 # Important Notes
-Azure DDoS Protection is provided for any Azure resource that has an Azure public IP address associated to it. such as virtual machines, load balancers, and application gateways. You need to register for the service before you can enable DDoS Protection Standard for your subscription. DDoS Protection Standard is available in the East US, East US 2, West US, West Central US, North Europe, West Europe, Japan West, Japan East, East Asia, and Southeast Asia regions only. 
+DDoS Protection Standard protects resources in a virtual network including public IP addresses associated with virtual machines, load balancers, and application gateways. When coupled with the Application Gateway web application firewall, DDoS Protection Standard can provide full layer 3 to layer 7 mitigation capability.  
+Refer [Azure DDoS Protection Standard](https://docs.microsoft.com/en-us/azure/virtual-network/ddos-protection-overview) for more details.
 
 
 
@@ -91,7 +92,7 @@ Azure DDoS Protection is provided for any Azure resource that has an Azure publi
 
 10. To create standard DDoS plan and configure with virtual network <br />
 
-    a. Go to Azure Portal --> Click on "Create a resource" --> Search "DDoS protection plan"
+    a. Go to Azure Portal --> Click on "Create a resource" --> Search "DDoS Protection  plan"
 
       ![](images/ddos-standard-plan-1.png)
     
@@ -108,7 +109,7 @@ Azure DDoS Protection is provided for any Azure resource that has an Azure publi
 
 # Perform 
  ### * Attack VM without DDoS protection & analyze <br />
-Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM without DDoS protection  <br />
+Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS Protection Standard. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM without DDoS Protection Standard  <br />
 
 In this case DDoS attack can not be detected as shown in below images. <br />
 To monitor from metrics to find public IP is under DDoS attack (Does not detect DDoS attack)  <br />
@@ -129,16 +130,16 @@ To monitor from metrics to find public IP inbound packets status (Does not detec
 
   ![](images/without-ddos-protection-inbound.png)
 
- ### * Attack on VM with DDoS protection <br />
+ ### * Attack on VM with DDoS Protection Standard <br />
 
-Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS protection. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM with DDoS protection <br />
+Microsoft have partnered with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) to offer tooling for Azure customers to generate traffic load against DDoS Protection enabled public endpoints to simulate TCP SYN flood and DNS flood attack on the VM without DDoS Protection Standard. Create a  support request with [BreakingPoint Cloud](https://www.ixiacom.com/products/breakingpoint-cloud) for simulation of a DDoS attack on infrastructure. The team executed TCP SYN flood and DNS flood attack on the VM with DDoS Protection Standard <br />
 
 
 <a name="detect"></a>
 
 # Detect and mitigate attack
 
-The DDoS attack on VM with DDoS protection is detect and mitigated as shown in below images. <br />
+The DDoS attack on VM with DDoS Protection Standard is detected and mitigated as shown in below images. <br />
 To monitor from metrics to find public IP is under DDoS attack (Detect DDoS attack)  <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select below options  <br />
     - Select specific Public IP in resource option   <br />
@@ -158,7 +159,7 @@ To monitor from metrics to find public IP inbound packets status (Detect DDoS at
    ![](images/monitoring-inbound-packets-DDoS.png)
 
 
-The DDoS protection detect and mitigates the attack on VM. The below image of network metrics of VM while network in attack. <br />
+The DDoS Protection Standard detects and mitigates the attack on VM. The below image of network metrics of VM while network in attack. <br />
 To monitor network in and network out follow below steps <br />
     Azure Portal-->Resource Group --> VM --> Metrics --> Select VM name in resource --> select netork in / out in metrics filter
 
