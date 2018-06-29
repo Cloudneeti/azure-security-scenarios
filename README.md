@@ -15,8 +15,7 @@ Welcome to Azure Security Center Scenarios wiki!
 * [DDoS attack on Virtual Machines](https://github.com/AvyanConsultingCorp/azure-security-scenarios/blob/master/scenarios/ddos-attack-on-vm/documentation/ddos-attack-on-virtual-machine.md)
 
 
-
-# Disclaimer
+## Disclaimer
 
 MIT License 
 
