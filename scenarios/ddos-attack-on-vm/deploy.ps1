@@ -24,7 +24,7 @@ param (
     [Parameter(Mandatory = $false)]
     [Alias("user")]
     [string]
-    $UserName,
+    $UserName = "mail@test.com",
 
     # Enter AAD Username password as securestring.
     [Parameter(Mandatory = $false)]
