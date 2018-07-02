@@ -160,7 +160,7 @@ else {
 }
 
 # Retrieve Access Key 
-$artifactsStorageAccKey = (Get-AzureRmResource | Where-Object ResourceName -eq $storageAccountName | Get-AzureRmStorageAccountKey)[0].value 
+$artifactsStorageAccKey = (Get-AzureRmStorageAccountKey -Name $storageAccount.StorageAccountName -ResourceGroupName $storageAccount.ResourceGroupName)[0].value
 
 # Copy files from the local storage staging location to the storage account container
 foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
