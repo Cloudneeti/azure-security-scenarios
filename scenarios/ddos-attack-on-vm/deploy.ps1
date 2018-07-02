@@ -164,7 +164,7 @@ $resourceId = (Get-AzureRmResource -ResourceGroupName $workloadResourceGroupName
 $actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName -WarningAction SilentlyContinue
  
 # Configuring the Metrics Alert rule for under DDoS attack status
-Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Actions $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
+Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Action $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
 
 Write-Verbose "Collecting details of VM login Username and Password"
 $outputValues = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
