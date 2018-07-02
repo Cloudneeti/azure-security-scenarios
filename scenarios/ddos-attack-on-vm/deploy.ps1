@@ -160,11 +160,14 @@ $deploymentOutputPIP = (Get-AzureRmResourceGroupDeployment -ResourceGroupName $w
 Write-Verbose "Configurating email alert at metrics level "
 #Getting the resource Id of Public IP
 $resourceId = (Get-AzureRmResource -ResourceGroupName $workloadResourceGroupName -ResourceName $deploymentOutputPIP -ResourceType Microsoft.Network/publicIPAddresses).ResourceId
+Write-Verbose "got resourceid "
 
 $actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName -WarningAction SilentlyContinue
- 
+Write-Verbose "got action email "
+
 # Configuring the Metrics Alert rule for under DDoS attack status
 Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Action $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
+Write-Verbose "metric rule created "
 
 Write-Verbose "Collecting details of VM login Username and Password"
 $outputValues = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json
