@@ -152,14 +152,16 @@ if ($storageAccount -eq $null) {
     New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue
 }
 else {
+    Write-Verbose "Artifact storage account aleardy exists."
     $artifactStagingDirectories = @(
         "$PSScriptRoot"
     )
     New-AzureStorageContainer -Name $storageContainerName -Context $storageAccount.Context -ErrorAction SilentlyContinue
 }
-
+Write-Verbose "Container created."
 # Retrieve Access Key 
 $artifactsStorageAccKey = (Get-AzureRmResource | Where-Object ResourceName -eq $storageAccountName | Get-AzureRmStorageAccountKey)[0].value 
+Write-Verbose "Connection key retrieved."
 
 # Copy files from the local storage staging location to the storage account container
 foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
