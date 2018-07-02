@@ -166,7 +166,7 @@ $actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName -WarningAction S
 Write-Verbose "got action email "
 
 # Configuring the Metrics Alert rule for under DDoS attack status
-Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Action $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
+Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroup $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Action $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
 Write-Verbose "metric rule created "
 
 Write-Verbose "Collecting details of VM login Username and Password"
