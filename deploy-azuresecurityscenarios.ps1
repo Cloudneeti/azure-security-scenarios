@@ -161,7 +161,7 @@ $artifactStagingDirectories = @(
 )
 
 # Checking for required modules and importing modules
-& "$PSScriptRoot\common\scripts\install-modules.ps1"
+#& "$PSScriptRoot\common\scripts\install-modules.ps1"
 
 if($UserName -eq $null){
     $UserName = (Get-AzureRmContext).Account.Id
