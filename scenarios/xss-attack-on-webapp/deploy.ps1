@@ -160,7 +160,7 @@ else {
 }
 
 # Retrieve Access Key 
-$artifactsStorageAccKey = (Get-AzureRmResource | Where-Object ResourceName -eq $storageAccountName | Get-AzureRmStorageAccountKey)[0].value 
+$artifactsStorageAccKey = (Get-AzureRmStorageAccountKey -Name $storageAccount.StorageAccountName -ResourceGroupName $storageAccount.ResourceGroupName)[0].value
 
 # Copy files from the local storage staging location to the storage account container
 foreach ($artifactStagingDirectory in $artifactStagingDirectories) {
@@ -192,8 +192,7 @@ New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName
 
 # Updating SQL server firewall rule
 Write-Verbose -Message "Updating SQL server firewall rule."
-$allResource = (Get-AzureRmResource | Where-Object ResourceGroupName -EQ $workloadResourceGroupName)
-$sqlServerName = ($allResource | Where-Object ResourceType -eq 'Microsoft.Sql/servers').ResourceName
+$sqlServerName = (Get-AzureRmSqlServer | Where-Object ResourceGroupName -EQ $workloadResourceGroupName).ServerName
 
 New-AzureRmSqlServerFirewallRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -FirewallRuleName "ClientIpRule$clientIPHash" -StartIpAddress $clientIPAddress -EndIpAddress $clientIPAddress -ErrorAction SilentlyContinue
 New-AzureRmSqlServerFirewallRule -ResourceGroupName $workloadResourceGroupName -ServerName $sqlServerName -FirewallRuleName "AllowAzureServices" -StartIpAddress 0.0.0.0 -EndIpAddress 0.0.0.0 -ErrorAction SilentlyContinue

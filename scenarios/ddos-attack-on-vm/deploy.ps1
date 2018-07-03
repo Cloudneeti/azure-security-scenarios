@@ -24,7 +24,7 @@ param (
     [Parameter(Mandatory = $false)]
     [Alias("user")]
     [string]
-    $UserName,
+    $UserName = "mail@test.com",
 
     # Enter AAD Username password as securestring.
     [Parameter(Mandatory = $false)]
@@ -155,16 +155,19 @@ Write-Verbose "Initiate Deployment for TestCase - $Prefix"
 New-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -TemplateFile "$PSScriptRoot\templates\workload\azuredeploy.json" -TemplateParameterFile $tmp -Name $armDeploymentName -Mode Incremental -DeploymentDebugLogLevel All -Verbose -Force
 
 # Getting the deployment output for public IP resource Id
- $deploymentOutputPIP = (Get-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -Name $armDeploymentName).Outputs.Values.value
+$deploymentOutputPIP = (Get-AzureRmResourceGroupDeployment -ResourceGroupName $workloadResourceGroupName -Name $armDeploymentName).Outputs.Values.value
 
- Write-Verbose "Configurating email alert at metrics level "
- #Getting the resource Id of Public IP
+Write-Verbose "Configurating email alert at metrics level "
+#Getting the resource Id of Public IP
 $resourceId = (Get-AzureRmResource -ResourceGroupName $workloadResourceGroupName -ResourceName $deploymentOutputPIP -ResourceType Microsoft.Network/publicIPAddresses).ResourceId
+Write-Verbose "got resourceid "
 
 $actionEmail = New-AzureRmAlertRuleEmail -CustomEmail $UserName -WarningAction SilentlyContinue
- 
+Write-Verbose "got action email "
+
 # Configuring the Metrics Alert rule for under DDoS attack status
-Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroupName $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Actions $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
+Add-AzureRmMetricAlertRule -Name "DDoS attack alert" -ResourceGroup $workloadResourceGroupName -location $Location -TargetResourceId $resourceId -MetricName "IfUnderDDoSAttack" -Operator GreaterThanOrEqual -Threshold 1 -WindowSize 00:05:00 -TimeAggregationOperator Total -Action $actionEmail -Description "Under DDoS attack alert" -WarningAction SilentlyContinue
+Write-Verbose "metric rule created "
 
 Write-Verbose "Collecting details of VM login Username and Password"
 $outputValues = Get-Content -Path "$PSScriptRoot\templates\azuredeploy.parameters.json" | ConvertFrom-Json

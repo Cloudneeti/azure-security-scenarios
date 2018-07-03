@@ -76,8 +76,13 @@ function Install-RequiredModules {
                 if ($moduleInformation -eq $null) {
                     Write-Host "Module - $module not found."
                     Write-Host "Installing module $module with minimum required version - $requiredModuleVersion"
-                    Install-Module $module -MinimumVersion $requiredModuleVersion
+                    Install-Module $module -MinimumVersion $requiredModuleVersion -Force -Scope CurrentUser
                     Write-Host "Module $module installed successfully."
+                }
+                elseif ($moduleInformation.Version.ToString() -ne $requiredModuleVersion) {
+                    Write-Host "Module $module with another version $($moduleInformation.Version.ToString()) found, Installing required module version - $requiredModuleVersion."
+                    Install-Module $module -RequiredVersion $requiredModuleVersion -Force -Scope CurrentUser
+                    Write-Host "Module - $module with version $requiredModuleVersion installed."
                 }
                 else {
                     Write-Host "Module - $module with required version - $requiredModuleVersion is installed."
