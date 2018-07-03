@@ -11,7 +11,7 @@ $rootFolder = Split-Path(Split-Path(Split-Path $MyInvocation.MyCommand.Path)) # 
 
 ## Required modules 
 $requiredModules = @{
-    'AzureRM' = '5.2.0';
+    'AzureRM' = '6.2.1';
     'AzureAD' = '2.0.0.131'
 }
 

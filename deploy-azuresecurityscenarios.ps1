@@ -142,7 +142,14 @@ param (
         ParameterSetName = "Deployment"
     )]
     [switch]
-    $SkipArtifactsUpload = $false
+    $SkipArtifactsUpload = $false,
+
+    # use this switch to install prerequisites.
+    [Parameter(Mandatory = $false,
+        ParameterSetName = "Cleanup"
+    )]
+    [switch]
+    $InstallPreRequisites
 
 )
 
@@ -161,7 +168,9 @@ $artifactStagingDirectories = @(
 )
 
 # Checking for required modules and importing modules
-#& "$PSScriptRoot\common\scripts\install-modules.ps1"
+if ($InstallPreRequisites) {
+    & "$PSScriptRoot\common\scripts\install-modules.ps1"
+}
 
 if($UserName -eq $null){
     $UserName = (Get-AzureRmContext).Account.Id
